@@ -8,6 +8,7 @@ Transformation can be done using Saxon-HE (http://saxon.sourceforge.net/).
 This directory contains a wrapper shell script to call Saxon-HE.
 
 Example Usage:
-
-  ./xsltproc.sh k01be003.xml xsl/KCTEI2TextGrid.xsl
+```
+$ ./xsltproc.sh k01be003.xml xslt/KCTEI2TextGrid.xsl
+```
 
