@@ -1,0 +1,13 @@
+
+This is a collection of XSLT-Stylesheets to transform Kiel Corpus TEI
+files (KCTEI) into file formats for specific linguistic software.
+
+stylesheets are XSLT 2.0
+Transformation can be done using Saxon-HE (http://saxon.sourceforge.net/).
+
+This directory contains a wrapper shell script to call Saxon-HE.
+
+Example Usage:
+
+  ./xsltproc.sh k01be003.xml xsl/KCTEI2TextGrid.xsl
+
