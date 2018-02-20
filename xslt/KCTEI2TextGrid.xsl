@@ -1,7 +1,8 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:xdt="http://www.w3.org/2005/xpath-datatypes"
-		xpath-default-namespace="http://www.tei-c.org/ns/1.0"
+                xmlns:my="http://myohmy.example.com"
+                xpath-default-namespace="http://www.tei-c.org/ns/1.0"
                 version="2.0">
 
 
@@ -22,6 +23,12 @@
   <xsl:variable name="last_pho-realized_to" select="replace(/TEI/text/body/annotationBlock[last()]/spanGrp[@type='pho-realized'][last()]/span[last()]/@to,'#', '')" />
 
   <xsl:variable name="pho-canonical_amount" select="count(/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span)" />
+
+  <xsl:function name="my:getIntervalById">
+    <xsl:param name="root_node" />
+    <xsl:param name="ID" />
+    <xsl:value-of select="$root_node/text/front/timeline/when[@xml:id=$ID]/@interval" />
+  </xsl:function>
 
 <xsl:template name="header">
 <xsl:text>File type = "ooTextFile"
@@ -44,15 +51,15 @@ item []:
         intervals: size = </xsl:text><xsl:value-of select="$word_amount" /><xsl:text>
         intervals [1]:
             xmin = </xsl:text><xsl:value-of select="$first_timeline_entry" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$first_word_start]/@interval" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$first_word_start)" /><xsl:text>
             text = &quot;&quot;
 </xsl:text>
 </xsl:template>
 
 <xsl:template name="word_footer">
 <xsl:text>        intervals [</xsl:text><xsl:value-of select="$word_amount" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$last_word_end]/@interval" /><xsl:text>
-            xmin = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
+            xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$last_word_end)" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
             text = &quot;&quot;
 </xsl:text>
 </xsl:template>
@@ -86,15 +93,15 @@ item []:
         intervals: size = </xsl:text><xsl:value-of select="$pho-realized_amount" /><xsl:text>
         intervals [1]:
             xmin = </xsl:text><xsl:value-of select="$first_timeline_entry" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$first_pho-realized_from]/@interval" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$first_pho-realized_from)" /><xsl:text>
             text = &quot;&quot;
 </xsl:text>
 </xsl:template>
 
 <xsl:template name="pho-realized_footer">
 <xsl:text>        intervals [</xsl:text><xsl:value-of select="$pho-realized_amount" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$last_pho-realized_to]/@interval" /><xsl:text>
-            xmin = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
+            xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$last_pho-realized_to)" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
             text = &quot;&quot;
 </xsl:text>
 </xsl:template>
@@ -118,8 +125,8 @@ item []:
 <xsl:variable name="start" select="replace(./../../@start,'#', '')" />
 <xsl:variable name="end" select="replace(./../../@end,'#', '')" />
 <xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$start]/@interval" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$end]/@interval" /><xsl:text>
+            xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$start)" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$end)" /><xsl:text>
             text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
@@ -132,8 +139,8 @@ item []:
 <xsl:variable name="end" select="replace(./@end,'#', '')" />
 <xsl:variable name="content" select="if (name(.) = 'vocal') then ./desc else 'pause'" />
 <xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$start]/@interval" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$end]/@interval" /><xsl:text>
+            xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$start)" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$end)" /><xsl:text>
             text = &quot;</xsl:text><xsl:value-of select="$content" /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
@@ -143,7 +150,7 @@ item []:
 <xsl:variable name="current_point" select="position()"/>
 <xsl:variable name="end" select="replace(./../../@end,'#', '')" />
 <xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
-            num = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$end]/@interval" /><xsl:text>
+            num = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$end)" /><xsl:text>
             text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
@@ -154,8 +161,8 @@ item []:
 <xsl:variable name="from" select="replace(./@from,'#', '')" />
 <xsl:variable name="to" select="replace(./@to,'#', '')" />
 <xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$from]/@interval" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$to]/@interval" /><xsl:text>
+            xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$from)" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$to)" /><xsl:text>
             text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
@@ -166,12 +173,12 @@ item []:
 <xsl:variable name="current_point" select="position()"/>
 <xsl:variable name="from_id" select="replace(./@from,'#', '')" />
 <xsl:variable name="to_id" select="replace(./@to,'#', '')" />
-<xsl:variable name="from" select="/TEI/text/front/timeline/when[@xml:id=$from_id]/@interval" />
-<xsl:variable name="to" select="/TEI/text/front/timeline/when[@xml:id=$to_id]/@interval" />
+<xsl:variable name="from" select="my:getIntervalById(/TEI,$from_id)" />
+<xsl:variable name="to" select="my:getIntervalById(/TEI,$to_id)" />
 <xsl:variable name="point" select="($to - $from) div 2 + $from" />
 
 <xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
-            number = </xsl:text><xsl:value-of select="$point" /><xsl:text>
+            num = </xsl:text><xsl:value-of select="$point" /><xsl:text>
             text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
