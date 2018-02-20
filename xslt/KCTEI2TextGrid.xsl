@@ -13,14 +13,13 @@
   <xsl:variable name="first_word_start" select="replace(/TEI/text/body/annotationBlock[1]/@start,'#', '')" />
   <xsl:variable name="last_word_end" select="replace(/TEI/text/body/annotationBlock[last()]/@end,'#', '')" />
 
+  <xsl:variable name="punctuations_amount" select="count(/TEI/text/body/annotationBlock/u/pc)" />
 
   <xsl:variable name="pho-realized_amount" select="count(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span) + 2" />
   <xsl:variable name="first_pho-realized_from" select="replace(/TEI/text/body/annotationBlock[1]/spanGrp[@type='pho-realized'][1]/span[1]/@from,'#', '')" />
   <xsl:variable name="last_pho-realized_to" select="replace(/TEI/text/body/annotationBlock[last()]/spanGrp[@type='pho-realized'][last()]/span[last()]/@to,'#', '')" />
 
-  <xsl:variable name="pho-canonical_amount" select="count(/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span) + 2" />
-  <xsl:variable name="first_pho-canonical_from" select="replace(/TEI/text/body/annotationBlock[1]/spanGrp[@type='pho-canonical'][1]/span[1]/@from,'#', '')" />
-  <xsl:variable name="last_pho-canonical_to" select="replace(/TEI/text/body/annotationBlock[last()]/spanGrp[@type='pho-canonical'][last()]/span[last()]/@to,'#', '')" />
+  <xsl:variable name="pho-canonical_amount" select="count(/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span)" />
 
 <xsl:template name="header">
 <xsl:text>File type = "ooTextFile"
@@ -29,7 +28,7 @@ Object class = "TextGrid"
 xmin = 0
 xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
 tiers? &lt;exists&gt;
-size = 3
+size = 4
 item []:
 </xsl:text>
 </xsl:template>
@@ -56,8 +55,18 @@ item []:
 </xsl:text>
 </xsl:template>
 
-<xsl:template name="pho-realized_header">
+<xsl:template name="punctuations_header">
 <xsl:text>    item [2]:
+        class = "TextTier" 
+        name = "punctuations" 
+        xmin = 0 
+        xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
+        points: size = </xsl:text><xsl:value-of select="$punctuations_amount" /><xsl:text>
+</xsl:text>
+</xsl:template>
+
+<xsl:template name="pho-realized_header">
+<xsl:text>    item [3]:
         class = "IntervalTier" 
         name = "pho-realized" 
         xmin = 0 
@@ -79,24 +88,12 @@ item []:
 </xsl:template>
 
 <xsl:template name="pho-canonical_header">
-<xsl:text>    item [3]:
-        class = "IntervalTier"
+<xsl:text>    item [4]:
+        class = "TextTier"
         name = "pho-canonical"
         xmin = 0
         xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
-        intervals: size = </xsl:text><xsl:value-of select="$pho-canonical_amount" /><xsl:text>
-        intervals [1]:
-            xmin = </xsl:text><xsl:value-of select="$first_timeline_entry" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$first_pho-canonical_from]/@interval" /><xsl:text>
-            text = &quot;&quot;
-</xsl:text>
-</xsl:template>
-
-<xsl:template name="pho-canonical_footer">
-<xsl:text>        intervals [</xsl:text><xsl:value-of select="$pho-canonical_amount" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$last_pho-canonical_to]/@interval" /><xsl:text>
-            xmin = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
-            text = &quot;&quot;
+        points: size = </xsl:text><xsl:value-of select="$pho-canonical_amount" /><xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -115,6 +112,16 @@ item []:
 </xsl:text>
 </xsl:for-each>
 <xsl:call-template name="word_footer" />
+<!-- build punctuation tier -->
+<xsl:call-template name="punctuations_header" />
+<xsl:for-each select="/TEI/text/body/annotationBlock/u/pc">
+<xsl:variable name="current_point" select="position()"/>
+<xsl:variable name="end" select="replace(./../../@end,'#', '')" />
+<xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
+            num = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$end]/@interval" /><xsl:text>
+            text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
+</xsl:text>
+</xsl:for-each>
 <!-- build tier of realized phones -->
 <xsl:call-template name="pho-realized_header" />
 <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span">
@@ -131,16 +138,18 @@ item []:
 <!-- build tier of canonical phones -->
 <xsl:call-template name="pho-canonical_header" />
 <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span">
-<xsl:variable name="current_interval" select="position() + 1"/>
-<xsl:variable name="from" select="replace(./@from,'#', '')" />
-<xsl:variable name="to" select="replace(./@to,'#', '')" />
-<xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$from]/@interval" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$to]/@interval" /><xsl:text>
+<xsl:variable name="current_point" select="position()"/>
+<xsl:variable name="from_id" select="replace(./@from,'#', '')" />
+<xsl:variable name="to_id" select="replace(./@to,'#', '')" />
+<xsl:variable name="from" select="/TEI/text/front/timeline/when[@xml:id=$from_id]/@interval" />
+<xsl:variable name="to" select="/TEI/text/front/timeline/when[@xml:id=$to_id]/@interval" />
+<xsl:variable name="point" select="($to - $from) div 2 + $from" />
+
+<xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
+            number = </xsl:text><xsl:value-of select="$point" /><xsl:text>
             text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
-<xsl:call-template name="pho-realized_footer" />
 <!--
 <xsl:apply-templates />
 -->
