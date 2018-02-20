@@ -15,6 +15,8 @@
 
   <xsl:variable name="punctuations_amount" select="count(/TEI/text/body/annotationBlock/u/pc)" />
 
+  <xsl:variable name="incidents_amount" select="count(/TEI/text/body/(pause|vocal))" />
+
   <xsl:variable name="pho-realized_amount" select="count(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span) + 2" />
   <xsl:variable name="first_pho-realized_from" select="replace(/TEI/text/body/annotationBlock[1]/spanGrp[@type='pho-realized'][1]/span[1]/@from,'#', '')" />
   <xsl:variable name="last_pho-realized_to" select="replace(/TEI/text/body/annotationBlock[last()]/spanGrp[@type='pho-realized'][last()]/span[last()]/@to,'#', '')" />
@@ -28,7 +30,7 @@ Object class = "TextGrid"
 xmin = 0
 xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
 tiers? &lt;exists&gt;
-size = 4
+size = 5
 item []:
 </xsl:text>
 </xsl:template>
@@ -55,8 +57,18 @@ item []:
 </xsl:text>
 </xsl:template>
 
-<xsl:template name="punctuations_header">
+<xsl:template name="incident_header">
 <xsl:text>    item [2]:
+        class = "IntervalTier" 
+        name = "incidents" 
+        xmin = 0 
+        xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
+        intervals: size = </xsl:text><xsl:value-of select="$incidents_amount" /><xsl:text>
+</xsl:text>
+</xsl:template>
+
+<xsl:template name="punctuations_header">
+<xsl:text>    item [3]:
         class = "TextTier" 
         name = "punctuations" 
         xmin = 0 
@@ -66,7 +78,7 @@ item []:
 </xsl:template>
 
 <xsl:template name="pho-realized_header">
-<xsl:text>    item [3]:
+<xsl:text>    item [4]:
         class = "IntervalTier" 
         name = "pho-realized" 
         xmin = 0 
@@ -88,7 +100,7 @@ item []:
 </xsl:template>
 
 <xsl:template name="pho-canonical_header">
-<xsl:text>    item [4]:
+<xsl:text>    item [5]:
         class = "TextTier"
         name = "pho-canonical"
         xmin = 0
@@ -112,6 +124,19 @@ item []:
 </xsl:text>
 </xsl:for-each>
 <xsl:call-template name="word_footer" />
+<!-- build incidents tier -->
+<xsl:call-template name="incident_header" />
+<xsl:for-each select="/TEI/text/body/(vocal|pause)">
+<xsl:variable name="current_interval" select="position()"/>
+<xsl:variable name="start" select="replace(./@start,'#', '')" />
+<xsl:variable name="end" select="replace(./@end,'#', '')" />
+<xsl:variable name="content" select="if (name(.) = 'vocal') then ./desc else 'pause'" />
+<xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
+            xmin = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$start]/@interval" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="/TEI/text/front/timeline/when[@xml:id=$end]/@interval" /><xsl:text>
+            text = &quot;</xsl:text><xsl:value-of select="$content" /><xsl:text>&quot;
+</xsl:text>
+</xsl:for-each>
 <!-- build punctuation tier -->
 <xsl:call-template name="punctuations_header" />
 <xsl:for-each select="/TEI/text/body/annotationBlock/u/pc">
