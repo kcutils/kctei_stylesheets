@@ -77,7 +77,7 @@
       <xsl:text>incidents</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
-      <xsl:text>t</xsl:text>
+      <xsl:text>d</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="display-name">
       <xsl:text>[incidents]</xsl:text>
@@ -105,7 +105,7 @@
       <xsl:text>punctuations</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
-      <xsl:text>t</xsl:text>
+      <xsl:text>d</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="display-name">
       <xsl:text>[punctuations]</xsl:text>
@@ -133,7 +133,7 @@
       <xsl:text>pho-realized</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
-      <xsl:text>t</xsl:text>
+      <xsl:text>a</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="display-name">
       <xsl:text>[pho-realized]</xsl:text>
@@ -161,21 +161,27 @@
       <xsl:text>pho-canonical</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
-      <xsl:text>t</xsl:text>
+      <xsl:text>a</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="display-name">
       <xsl:text>[pho-canonical]</xsl:text>
     </xsl:attribute>
     <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span">
-      <xsl:element name="event">
-        <xsl:attribute name="start">
-          <xsl:value-of select="replace(./@from,'#','')" />
-        </xsl:attribute>
-        <xsl:attribute name="end">
-          <xsl:value-of select="replace(./@to,'#','')" />
-        </xsl:attribute>
-        <xsl:value-of select="." />
-      </xsl:element>
+      <xsl:variable name="from" select="./@from" />
+      <xsl:variable name="to" select="./@to" />
+      <xsl:if test="$from != $to">
+        <xsl:element name="event">
+          <xsl:attribute name="start">
+            <xsl:value-of select="replace($from,'#','')" />
+          </xsl:attribute>
+          <xsl:attribute name="end">
+            <xsl:value-of select="replace($to,'#','')" />
+          </xsl:attribute>
+          <xsl:value-of select="../*[./@from = $from and ./@to = $from and . = ../*[1]]" />
+          <xsl:value-of select="." />
+          <xsl:value-of select="../*[./@to = $to and ./@from = $to]" />
+        </xsl:element>
+      </xsl:if>
     </xsl:for-each>
   </xsl:element>
 </xsl:template>
