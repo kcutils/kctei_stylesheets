@@ -11,12 +11,18 @@
   <xsl:variable name="last_timeline_entry" select="max(/TEI/text/front/timeline/when/@interval)" />
 
   <xsl:variable name="word_amount" select="count(/TEI/text/body/annotationBlock/u/w) + 2" />
-  <xsl:variable name="first_word_start" select="replace(/TEI/text/body/annotationBlock[1]/@start,'#', '')" />
-  <xsl:variable name="last_word_end" select="replace(/TEI/text/body/annotationBlock[last()]/@end,'#', '')" />
+  <xsl:variable name="first_word_start" select="my:getIntervalById(/TEI,replace(/TEI/text/body/annotationBlock[1]/@start,'#', ''))" />
+  <xsl:variable name="last_word_end" select="my:getIntervalById(/TEI,replace(/TEI/text/body/annotationBlock[last()]/@end,'#', ''))" />
 
   <xsl:variable name="punctuations_amount" select="count(/TEI/text/body/annotationBlock/u/pc)" />
 
   <xsl:variable name="incidents_amount" select="count(/TEI/text/body/(pause|vocal))" />
+  <xsl:variable name="first_inci_start" select="my:getIntervalById(/TEI,replace(/TEI/text/body/(pause|vocal)[1]/@start,'#', ''))" />
+  <xsl:variable name="last_inci_end" select="my:getIntervalById(/TEI,replace(/TEI/text/body/(pause|vocal)[last()]/@end,'#', ''))" />
+
+  <xsl:variable name="word_inc_amount" select="$word_amount + $incidents_amount" />
+  <xsl:variable name="word_inc_start" select="min(($first_word_start, $first_inci_start))" />
+  <xsl:variable name="word_inc_end" select="max(($last_word_end, $last_inci_end))" />
 
   <xsl:variable name="pho-realized_amount" select="count(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span) + 2" />
   <xsl:variable name="first_pho-realized_from" select="replace(/TEI/text/body/annotationBlock[1]/spanGrp[@type='pho-realized'][1]/span[1]/@from,'#', '')" />
@@ -37,28 +43,28 @@ Object class = "TextGrid"
 xmin = 0
 xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
 tiers? &lt;exists&gt;
-size = 5
+size = 4
 item []:
 </xsl:text>
 </xsl:template>
 
-<xsl:template name="word_header">
+<xsl:template name="wordinc_header">
 <xsl:text>    item [1]:
         class = "IntervalTier" 
-        name = "words" 
+        name = "words and incidents" 
         xmin = 0 
         xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
-        intervals: size = </xsl:text><xsl:value-of select="$word_amount" /><xsl:text>
+        intervals: size = </xsl:text><xsl:value-of select="$word_inc_amount" /><xsl:text>
         intervals [1]:
             xmin = </xsl:text><xsl:value-of select="$first_timeline_entry" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$first_word_start)" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="$word_inc_start" /><xsl:text>
             text = &quot;&quot;
 </xsl:text>
 </xsl:template>
 
-<xsl:template name="word_footer">
-<xsl:text>        intervals [</xsl:text><xsl:value-of select="$word_amount" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$last_word_end)" /><xsl:text>
+<xsl:template name="wordinc_footer">
+<xsl:text>        intervals [</xsl:text><xsl:value-of select="$word_inc_amount" /><xsl:text>]:
+            xmin = </xsl:text><xsl:value-of select="$word_inc_end" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
             text = &quot;&quot;
 </xsl:text>
@@ -75,7 +81,7 @@ item []:
 </xsl:template>
 
 <xsl:template name="punctuations_header">
-<xsl:text>    item [3]:
+<xsl:text>    item [2]:
         class = "TextTier" 
         name = "punctuations" 
         xmin = 0 
@@ -85,7 +91,7 @@ item []:
 </xsl:template>
 
 <xsl:template name="pho-realized_header">
-<xsl:text>    item [4]:
+<xsl:text>    item [3]:
         class = "IntervalTier" 
         name = "pho-realized" 
         xmin = 0 
@@ -107,7 +113,7 @@ item []:
 </xsl:template>
 
 <xsl:template name="pho-canonical_header">
-<xsl:text>    item [5]:
+<xsl:text>    item [4]:
         class = "TextTier"
         name = "pho-canonical"
         xmin = 0
@@ -118,32 +124,21 @@ item []:
 
 <xsl:template match="/">
 <xsl:call-template name="header" />
-<!-- build word tier -->
-<xsl:call-template name="word_header" />
-<xsl:for-each select="/TEI/text/body/annotationBlock/u/w">
+<!-- build tier for words and incidents -->
+<xsl:call-template name="wordinc_header" />
+<xsl:for-each select="/TEI/text/body/(annotationBlock/u/w|(vocal|pause))">
 <xsl:variable name="current_interval" select="position() + 1"/>
-<xsl:variable name="start" select="replace(./../../@start,'#', '')" />
-<xsl:variable name="end" select="replace(./../../@end,'#', '')" />
+<xsl:variable name="start" select="if (name(.) = 'w') then replace(./../../@start,'#', '') else replace(./@start,'#', '')" />
+<xsl:variable name="end" select="if (name(.) = 'w') then replace(./../../@end,'#', '') else replace(./@end,'#', '')" />
+<xsl:variable name="text" select="if (name(.) = 'w') then . else (if (name(.) = 'vocal') then ./desc else 'pause')" />
+
 <xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
             xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$start)" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$end)" /><xsl:text>
-            text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
+            text = &quot;</xsl:text><xsl:value-of select="$text" /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
-<xsl:call-template name="word_footer" />
-<!-- build incidents tier -->
-<xsl:call-template name="incident_header" />
-<xsl:for-each select="/TEI/text/body/(vocal|pause)">
-<xsl:variable name="current_interval" select="position()"/>
-<xsl:variable name="start" select="replace(./@start,'#', '')" />
-<xsl:variable name="end" select="replace(./@end,'#', '')" />
-<xsl:variable name="content" select="if (name(.) = 'vocal') then ./desc else 'pause'" />
-<xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$start)" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$end)" /><xsl:text>
-            text = &quot;</xsl:text><xsl:value-of select="$content" /><xsl:text>&quot;
-</xsl:text>
-</xsl:for-each>
+<xsl:call-template name="wordinc_footer" />
 <!-- build punctuation tier -->
 <xsl:call-template name="punctuations_header" />
 <xsl:for-each select="/TEI/text/body/annotationBlock/u/pc">
@@ -182,9 +177,6 @@ item []:
             text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
-<!--
-<xsl:apply-templates />
--->
 </xsl:template>
 
 <xsl:template match="/TEI/teiHeader"></xsl:template>
