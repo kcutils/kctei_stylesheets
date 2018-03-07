@@ -65,7 +65,7 @@ Object class = "TextGrid"
 xmin = 0
 xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
 tiers? &lt;exists&gt;
-size = 4
+size = 5
 item []:
 </xsl:text>
 </xsl:template>
@@ -216,18 +216,68 @@ item []:
 <!-- build tier of canonical phones -->
 <xsl:call-template name="pho-canonical_header" />
 <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span">
-<xsl:variable name="current_point" select="position()"/>
-<xsl:variable name="from_id" select="replace(./@from,'#', '')" />
-<xsl:variable name="to_id" select="replace(./@to,'#', '')" />
-<xsl:variable name="from" select="my:getIntervalById(/TEI,$from_id)" />
-<xsl:variable name="to" select="my:getIntervalById(/TEI,$to_id)" />
-<xsl:variable name="point" select="($to - $from) div 2 + $from" />
+  <xsl:variable name="current_point" select="position()"/>
+  <xsl:variable name="from_id" select="replace(./@from,'#', '')" />
+  <xsl:variable name="to_id" select="replace(./@to,'#', '')" />
+  <xsl:variable name="from" select="my:getIntervalById(/TEI,$from_id)" />
+  <xsl:variable name="to" select="my:getIntervalById(/TEI,$to_id)" />
+  <xsl:variable name="point" select="($to - $from) div 2 + $from" />
 
 <xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
             num = </xsl:text><xsl:value-of select="$point" /><xsl:text>
             text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
 </xsl:for-each>
+
+<xsl:variable name="groups">
+  <xsl:for-each-group select="/TEI/text/body/annotationBlock/spanGrp[@type='prolab']/span" group-by="@from">
+    <xsl:variable name="point" select ="my:getIntervalById(/TEI,replace(current-grouping-key(),'#',''))" />
+    <group point="{$point}">
+      <xsl:copy-of select="current-group()" />
+    </group>
+  </xsl:for-each-group>
+</xsl:variable>
+
+<xsl:variable name="prosodic_labels">
+<xsl:for-each select="$groups/*">
+    <xsl:variable name="previous_group_size" select="count(preceding-sibling::group[1]/*)" />
+      <entry point="{@point}">
+<xsl:text>        points [</xsl:text><xsl:value-of select="$previous_group_size + position()"/><xsl:text>]:
+            num = </xsl:text><xsl:value-of select="@point"/><xsl:text>
+            text = &quot;</xsl:text>
+
+    <xsl:for-each select="*">
+      <xsl:variable name="text" select="."/>
+      <xsl:value-of select="$text"/>
+      <xsl:if test="position() != last()">
+        <xsl:choose>
+          <xsl:when test="contains($text, 'PG')">
+            <xsl:text>    </xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text>_</xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:if>
+    </xsl:for-each>
+
+<xsl:text>&quot;
+</xsl:text>
+      </entry>
+  </xsl:for-each>
+</xsl:variable>
+
+<xsl:text>    item [5]:
+        class = "TextTier"
+        name = "prolab"
+        xmin = 0
+        xmax = </xsl:text><xsl:value-of select="$prosodic_labels/*[last()]/@point" /><xsl:text>
+        points: size = </xsl:text><xsl:value-of select="count($prosodic_labels/*)" /><xsl:text>
+</xsl:text>
+<xsl:for-each select="$prosodic_labels/*">
+<xsl:value-of select="."/>
+</xsl:for-each>
+
 </xsl:template>
 
 <xsl:template match="/TEI/teiHeader"></xsl:template>
