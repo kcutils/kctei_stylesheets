@@ -25,14 +25,19 @@
   <xsl:variable name="last_timeline_entry" select="max(/TEI/text/front/timeline/when/@interval)" />
 
   <xsl:variable name="word_amount" select="count(/TEI/text/body/annotationBlock/u/w)" />
-  <xsl:variable name="first_word_start" select="my:getIntervalById(/TEI,replace(/TEI/text/body/annotationBlock[1]/@start,'#', ''))" />
-  <xsl:variable name="last_word_end" select="my:getIntervalById(/TEI,replace(/TEI/text/body/annotationBlock[last()]/@end,'#', ''))" />
+  <xsl:variable name="first_word_start" select="my:getIntervalById(/TEI,replace(/TEI/text/body/annotationBlock[1]/u/w[1]/@synch,'#', ''))" />
+  <xsl:variable name="last_word_end" select="my:getIntervalById(/TEI,replace((/TEI/text/body/annotationBlock[last()]/u/anchor)[last()]/@synch,'#', ''))" />
 
   <xsl:variable name="punctuations_amount" select="count(/TEI/text/body/annotationBlock/u/pc)" />
 
-  <xsl:variable name="incidents_amount" select="count(/TEI/text/body/(pause|vocal)) + 2" />
-  <xsl:variable name="first_inci_start" select="my:getIntervalById(/TEI,replace(/TEI/text/body/(pause|vocal)[1]/@start,'#', ''))" />
-  <xsl:variable name="last_inci_end" select="my:getIntervalById(/TEI,replace(/TEI/text/body/(pause|vocal)[last()]/@end,'#', ''))" />
+  <xsl:variable name="incidents_amount" select="count(/TEI/text/body/((vocal|pause)|annotationBlock/u/(pause|vocal))) + 2" />
+  <xsl:variable name="first_body_inci_start" select="my:getIntervalById(/TEI,replace((/TEI/text/body/(pause|vocal))[1]/@start,'#', ''))" />
+  <xsl:variable name="first_u_inci_start" select="my:getIntervalById(/TEI,replace((/TEI/text/body/annotationBlock/u/(pause|vocal))[1]/@start,'#', ''))" />
+  <xsl:variable name="first_inci_start" select="min(($first_body_inci_start, $first_u_inci_start))" />
+
+  <xsl:variable name="last_body_inci_end" select="my:getIntervalById(/TEI,replace((/TEI/text/body/(pause|vocal))[last()]/@end,'#', ''))" />
+  <xsl:variable name="last_u_inci_end" select="my:getIntervalById(/TEI,replace((/TEI/text/body/annotationBlock/u/(pause|vocal))[last()]/@end,'#', ''))" />
+  <xsl:variable name="last_inci_end" select="max(($last_body_inci_end, $last_u_inci_end))" />
 
   <xsl:variable name="word_inc_amount" select="$word_amount + $incidents_amount" />
   <xsl:variable name="word_inc_start" select="min(($first_word_start, $first_inci_start))" />
@@ -155,11 +160,11 @@ item []:
 <xsl:call-template name="header" />
 <!-- build tier for words and incidents -->
 <xsl:call-template name="wordinc_header" />
-<xsl:for-each select="/TEI/text/body/(annotationBlock/u/w|(vocal|pause))">
+<xsl:for-each select="/TEI/text/body/((vocal|pause)|(annotationBlock/u/(w|vocal|pause)))">
 <xsl:variable name="current_interval" select="position() + 1"/>
-<xsl:variable name="start" select="if (name(.) = 'w') then replace(./../../@start,'#', '') else replace(./@start,'#', '')" />
-<xsl:variable name="end" select="if (name(.) = 'w') then replace(./../../@end,'#', '') else replace(./@end,'#', '')" />
-<xsl:variable name="text" select="if (name(.) = 'w') then . else (if (name(.) = 'vocal') then concat('((', ./desc, '))') else '((pause))')" />
+<xsl:variable name="start" select="if (name(.) = 'w') then replace(./@synch,'#', '') else replace(./@start,'#', '')" />
+<xsl:variable name="end" select="if (name(.) = 'w') then replace(following::anchor[1]/@synch,'#', '') else replace(./@end,'#', '')" />
+<xsl:variable name="text" select="if (name(.) = 'w') then . else (if (name(.) = 'vocal') then concat('&lt;', ./desc, '&gt;') else '&lt;pause&gt;')" />
 
 <xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
             xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$start)" /><xsl:text>
@@ -170,7 +175,7 @@ item []:
 <xsl:call-template name="wordinc_footer" />
 <!-- build tier for incidents
 <xsl:call-template name="incident_header" />
-<xsl:for-each select="/TEI/text/body/(vocal|pause)">
+<xsl:for-each select="/TEI/text/body/annotationBlock/u/(vocal|pause)">
 <xsl:variable name="current_interval" select="position() + 1"/>
 <xsl:variable name="start" select="replace(./@start,'#', '')" />
 <xsl:variable name="end" select="replace(./@end,'#', '')" />
@@ -196,7 +201,7 @@ item []:
 </xsl:for-each>
 <!-- build tier of realized phones -->
 <xsl:call-template name="pho-realized_header" />
-<xsl:for-each select="/TEI/text/body/(annotationBlock/spanGrp[@type='pho-realized']/span|(vocal|pause))">
+<xsl:for-each select="/TEI/text/body/((vocal|pause)|annotationBlock/(spanGrp[@type='pho-realized']/span|u/(vocal|pause)))">
 <xsl:variable name="current_interval" select="position() + 1"/>
 <xsl:variable name="from" select="if (name(.) = 'span') then replace(./@from,'#', '') else replace(./@start,'#', '')" />
 <xsl:variable name="to" select="if (name(.) = 'span') then replace(./@to,'#', '') else replace(./@end,'#', '')" />
