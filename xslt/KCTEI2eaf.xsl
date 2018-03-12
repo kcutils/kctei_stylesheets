@@ -239,6 +239,81 @@
   </xsl:element>
 </xsl:template>
 
+<xsl:template name="prosody_tier">
+  <xsl:element name="TIER">
+    <xsl:attribute name="LINGUISTIC_TYPE_REF">
+      <xsl:text>default-lt</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="TIER_ID">
+      <xsl:text>prolab</xsl:text>
+    </xsl:attribute>
+
+    <xsl:variable name="groups">
+      <xsl:for-each-group select="/TEI/text/body/annotationBlock/spanGrp[@type='prolab']/span" group-by="@from">
+        <xsl:variable name="from" select ="replace(./@from,'#','')" />
+        <group from="{$from}">
+          <xsl:copy-of select="current-group()" />
+        </group>
+      </xsl:for-each-group>
+    </xsl:variable>
+
+    <xsl:for-each select="$groups/*">
+      <xsl:element name="ANNOTATION">
+        <xsl:element name="ALIGNABLE_ANNOTATION">
+          <xsl:attribute name="ANNOTATION_ID">
+            <xsl:value-of select="generate-id(.)" />
+          </xsl:attribute>
+
+          <xsl:variable name="to_mark_name" select="concat('T', xs:integer(replace(@from, 'T', '')) + 1)" />
+
+          <xsl:attribute name="TIME_SLOT_REF1">
+            <xsl:choose>
+              <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
+                <xsl:value-of select="@from" />
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="concat('T', xs:integer(replace(@from, 'T', '')) - 1)" />
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:attribute>
+
+          <!-- we need some extension in time,
+             so take the next time mark -->
+
+          <xsl:attribute name="TIME_SLOT_REF2">
+            <xsl:choose>
+              <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
+                <xsl:value-of select="concat('T', xs:integer(replace(@from, 'T', '')) + 1)" />
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="@from" />
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:attribute>
+
+          <xsl:element name="ANNOTATION_VALUE">
+            <xsl:for-each select="*">
+              <xsl:variable name="text" select="."/>
+              <xsl:value-of select="$text"/>
+              <xsl:if test="position() != last()">
+                <xsl:choose>
+                  <xsl:when test="contains($text, 'PG')">
+                    <xsl:text>    </xsl:text>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:text>_</xsl:text>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </xsl:if>
+            </xsl:for-each>
+          </xsl:element>
+
+        </xsl:element>
+      </xsl:element>
+    </xsl:for-each>
+  </xsl:element>
+</xsl:template>
+
 <xsl:template name="footer">
   <xsl:element name="LINGUISTIC_TYPE">
     <xsl:attribute name="GRAPHIC_REFERENCES">
@@ -282,6 +357,7 @@
     <xsl:call-template name="punctuations_tier" />
     <xsl:call-template name="pho-realized_tier" />
     <xsl:call-template name="pho-canonical_tier" />
+    <xsl:call-template name="prosody_tier" />
 
     <xsl:call-template name="footer" />
   </xsl:element>
