@@ -16,7 +16,7 @@
     </xsl:attribute>
     <xsl:element name="MEDIA_DESCRIPTOR">
       <xsl:attribute name="MEDIA_URL">
-        <xsl:value-of select="/TEI/teiHeader/fileDesc/sourceDesc/recordingStmt/media/@url" />
+        <xsl:value-of select="/TEI/teiHeader/fileDesc/sourceDesc/recordingStmt/recording/media/@url" />
       </xsl:attribute>
       <xsl:attribute name="MIME_TYPE">
         <xsl:text>audio/x-wav</xsl:text>
@@ -55,10 +55,10 @@
             <xsl:value-of select="./@xml:id" />
           </xsl:attribute>
           <xsl:attribute name="TIME_SLOT_REF1">
-            <xsl:value-of select="replace(./../../@start,'#','')" />
+            <xsl:value-of select="replace(./@synch,'#','')" />
           </xsl:attribute>
           <xsl:attribute name="TIME_SLOT_REF2">
-            <xsl:value-of select="replace(./../../@end,'#','')" />
+            <xsl:value-of select="replace(following::anchor[1]/@synch,'#','')" />
           </xsl:attribute>
           <xsl:element name="ANNOTATION_VALUE">
             <xsl:value-of select="." />
@@ -77,7 +77,7 @@
     <xsl:attribute name="TIER_ID">
       <xsl:text>incidents</xsl:text>
     </xsl:attribute>
-    <xsl:for-each select="/TEI/text/body/(vocal|pause)">
+    <xsl:for-each select="//(vocal|pause)">
       <xsl:element name="ANNOTATION">
         <xsl:element name="ALIGNABLE_ANNOTATION">
           <xsl:attribute name="ANNOTATION_ID">
@@ -115,11 +115,14 @@
           <xsl:attribute name="ANNOTATION_ID">
             <xsl:value-of select="./@xml:id" />
           </xsl:attribute>
+          <!-- we need some extension in time,
+               so take the last time mark
+            -->
           <xsl:attribute name="TIME_SLOT_REF1">
-            <xsl:value-of select="replace(./../../@end,'#','')" />
+            <xsl:value-of select="concat('T', xs:integer(replace(preceding::anchor[1]/@synch,'#T','')) - 1)" />
           </xsl:attribute>
           <xsl:attribute name="TIME_SLOT_REF2">
-            <xsl:value-of select="replace(./../../@end,'#','')" />
+            <xsl:value-of select="replace(preceding::anchor[1]/@synch,'#','')" />
           </xsl:attribute>
           <xsl:element name="ANNOTATION_VALUE">
             <xsl:value-of select="." />
@@ -168,61 +171,73 @@
       <xsl:text>pho-canonical</xsl:text>
     </xsl:attribute>
     <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span">
-      <xsl:element name="ANNOTATION">
-        <xsl:element name="ALIGNABLE_ANNOTATION">
-          <xsl:attribute name="ANNOTATION_ID">
-            <xsl:value-of select="./@xml:id" />
-          </xsl:attribute>
-          <xsl:attribute name="TIME_SLOT_REF1">
-            <xsl:value-of select="replace(./@from,'#','')" />
-          </xsl:attribute>
-          <xsl:attribute name="TIME_SLOT_REF2">
-            <xsl:value-of select="replace(./@to,'#','')" />
-          </xsl:attribute>
-          <xsl:element name="ANNOTATION_VALUE">
-            <xsl:value-of select="." />
-          </xsl:element>
-        </xsl:element>
-      </xsl:element>
-    </xsl:for-each>
-  </xsl:element>
-</xsl:template>
 
-<!--
-<xsl:template name="pho-canonical_tier">
-  <xsl:element name="tier">
-    <xsl:attribute name="id">
-      <xsl:text>TIE4</xsl:text>
-    </xsl:attribute>
-    <xsl:attribute name="category">
-      <xsl:text>pho-canonical</xsl:text>
-    </xsl:attribute>
-    <xsl:attribute name="type">
-      <xsl:text>a</xsl:text>
-    </xsl:attribute>
-    <xsl:attribute name="display-name">
-      <xsl:text>[pho-canonical]</xsl:text>
-    </xsl:attribute>
-    <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span">
       <xsl:variable name="from" select="./@from" />
+      <xsl:variable name="from_val" select="xs:integer(replace($from, '#T', ''))" />
       <xsl:variable name="to" select="./@to" />
+      <xsl:variable name="to_val" select="xs:integer(replace($to, '#T', ''))" />
+      <xsl:variable name="word">
+        <xsl:for-each select="../../u/w">
+          <xsl:variable name="w_begin" select="@synch" />
+          <xsl:variable name="w_begin_val" select="xs:integer(replace($w_begin, '#T', ''))" />
+          <xsl:variable name="w_end" select="following::anchor[1]/@synch" />
+          <xsl:variable name="w_end_val" select="xs:integer(replace($w_end, '#T', ''))" />
+          <xsl:if test="$from_val ge $w_begin_val and
+                        $to_val   ge $w_begin_val and
+                        $from_val le $w_end_val   and
+                        $to_val   le $w_end_val">
+            <w begin="{$w_begin_val}" end="{$w_end_val}">
+              <xsl:value-of select="." />
+            </w>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:variable>
+      <xsl:variable name="word_from" select="$word/*[1]/@begin" as="xs:integer" />
+      <xsl:variable name="word_to" select="$word/*[1]/@end" as="xs:integer" />
       <xsl:if test="$from != $to">
-        <xsl:element name="event">
-          <xsl:attribute name="start">
-            <xsl:value-of select="replace($from,'#','')" />
-          </xsl:attribute>
-          <xsl:attribute name="end">
-            <xsl:value-of select="replace($to,'#','')" />
-          </xsl:attribute>
-          <xsl:value-of select="../*[./@from = $from and ./@to = $from and . = ../*[1]]" />
-          <xsl:value-of select="." />
-          <xsl:value-of select="../*[./@to = $to and ./@from = $to]" />
+        <xsl:element name="ANNOTATION">
+          <xsl:element name="ALIGNABLE_ANNOTATION">
+            <xsl:attribute name="ANNOTATION_ID">
+              <xsl:value-of select="./@xml:id" />
+            </xsl:attribute>
+            <xsl:attribute name="TIME_SLOT_REF1">
+              <xsl:value-of select="replace($from,'#','')" />
+            </xsl:attribute>
+            <xsl:attribute name="TIME_SLOT_REF2">
+              <xsl:value-of select="replace($to,'#','')" />
+            </xsl:attribute>
+            <xsl:element name="ANNOTATION_VALUE">
+
+              <!-- put all unrealized phones (from=to)
+                   in front of the current phone if they begin at the same time
+                   and if they belong to the same word as the current phone -->
+              <xsl:for-each select="../*[./@from = $from and
+                                         ./@to   = $from and
+                                         xs:integer(replace(./@from, '#T', '')) eq $word_from and
+                                         xs:integer(replace(./@from, '#T', '')) le $word_to]">
+                <xsl:value-of select="." />
+                <xsl:text>_</xsl:text>
+              </xsl:for-each>
+
+              <xsl:value-of select="." />
+
+              <!-- put all unrealized phones (from=to)
+                   after the current phone if they end at the same time
+                   and if they belong to the same word as the current phone -->
+              <xsl:for-each select="../*[./@to   = $to and
+                                         ./@from = $to and
+                                         xs:integer(replace(./@to, '#T', '')) gt $word_from and
+                                         xs:integer(replace(./@to, '#T', '')) lt $word_to]">
+                <xsl:text>_</xsl:text>
+                <xsl:value-of select="." />
+              </xsl:for-each>
+            </xsl:element>
+          </xsl:element>
         </xsl:element>
       </xsl:if>
     </xsl:for-each>
   </xsl:element>
 </xsl:template>
--->
 
 <xsl:template name="footer">
   <xsl:element name="LINGUISTIC_TYPE">
