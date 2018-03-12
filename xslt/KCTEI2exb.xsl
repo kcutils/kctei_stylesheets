@@ -255,14 +255,35 @@
 
     <xsl:for-each select="$groups/*">
       <xsl:element name="event">
+
+        <!-- we need some extension in time,
+             so take the previous time mark if there is no following one -->
+
+        <xsl:variable name="to_mark_name" select="concat('T', xs:integer(replace(@from, 'T', '')) + 1)" />
+
         <xsl:attribute name="start">
-          <xsl:value-of select="@from" />
+          <xsl:choose>
+            <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
+              <xsl:value-of select="@from" />
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="concat('T', xs:integer(replace(@from, 'T', '')) - 1)" />
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:attribute>
 
         <!-- we need some extension in time,
-             so take the next time mark -->
+             so take the next time mark if it exists -->
+
         <xsl:attribute name="end">
-          <xsl:value-of select="concat('T', xs:integer(replace(@from, 'T', '')) + 1)" />
+          <xsl:choose>
+            <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
+              <xsl:value-of select="concat('T', xs:integer(replace(@from, 'T', '')) + 1)" />
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="@from" />
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:attribute>
    
         <xsl:for-each select="*">

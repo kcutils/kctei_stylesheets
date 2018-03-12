@@ -264,6 +264,9 @@
             <xsl:value-of select="generate-id(.)" />
           </xsl:attribute>
 
+          <!-- we need some extension in time,
+               so take the previous time mark if there is no following one -->
+
           <xsl:variable name="to_mark_name" select="concat('T', xs:integer(replace(@from, 'T', '')) + 1)" />
 
           <xsl:attribute name="TIME_SLOT_REF1">
@@ -278,8 +281,7 @@
           </xsl:attribute>
 
           <!-- we need some extension in time,
-             so take the next time mark -->
-
+               so take the next time mark if it exists -->
           <xsl:attribute name="TIME_SLOT_REF2">
             <xsl:choose>
               <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
