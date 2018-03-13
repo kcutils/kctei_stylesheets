@@ -1,3 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+  This stylesheet transforms Kiel Corpus ISO/TEO to eaf (ELAN).
+
+  It produces six tiers:
+
+    - words
+    - non-verbal sounds
+    - punctuations
+    - realized phones
+    - canonical phones
+    - prosodic labels
+
+  All of these tiers are interval tiers, meaning that there cannot
+  be an event with no duration (like a point in praat). Since the
+  Kiel Corpus contains annotations without duration (like
+  unrealized phones or sentence punctuations), we need several
+  "hacks" to make them appear in ELAN:
+
+    - Punctuations only appear after a word, so we take the words
+      end as the puntuations end and take the previous timeline
+      entry as the "begin" of that puncutation.
+    - Canonical phones that are not realized will be concatenated
+      with phones that belong to the same word.
+    - Prosodic labels are assigned to a single point in time.
+      This point is taken as the end of a label and the previous
+      timeline entry is taken as the begin of a label. Furthermore
+      all prosodic labels that are assigned to the same point in
+      time will be concatenated using a certain symbol. If phrase
+      end and phrase begin coincide another symbol will used to
+      seperate labels that belong to different phrases.
+
+
+-->
+
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                 xmlns:xdt="http://www.w3.org/2005/xpath-datatypes"
