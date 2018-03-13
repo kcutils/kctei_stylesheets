@@ -1,1 +1,5 @@
+data/*
+!data/.gitkeep
+lib/*
+!lib/.gitkeep
 test/

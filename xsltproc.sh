@@ -7,7 +7,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-SAXON_JAR="/usr/local/share/java/classes/saxon9he.jar"
+SAXON_JAR="lib/saxon9he.jar"
 
 if [ ! -f "$SAXON_JAR" ]; then
   echo "Saxon JAR file not found! Exiting ..."
