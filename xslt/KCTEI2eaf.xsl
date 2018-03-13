@@ -129,7 +129,10 @@
             <xsl:value-of select="replace(./@end,'#','')" />
           </xsl:attribute>
           <xsl:element name="ANNOTATION_VALUE">
-            <xsl:value-of select="if (name(.) = 'vocal') then ./desc else 'pause'" />
+            <xsl:value-of select="if (name(.) = 'vocal') then
+                                     concat('&lt;', ./desc, '&gt;') else
+                                     '&lt;pause&gt;'
+                                 " />
           </xsl:element>
         </xsl:element>
       </xsl:element>
@@ -318,6 +321,7 @@
 
           <!-- we need some extension in time,
                so take the next time mark if it exists -->
+
           <xsl:attribute name="TIME_SLOT_REF2">
             <xsl:choose>
               <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">

@@ -125,7 +125,10 @@
         <xsl:attribute name="end">
           <xsl:value-of select="replace(./@end,'#','')" />
         </xsl:attribute>
-        <xsl:value-of select="if (name(.) = 'vocal') then ./desc else 'pause'" />
+        <xsl:value-of select="if (name(.) = 'vocal') then
+                                 concat('&lt;', ./desc, '&gt;') else
+                                 '&lt;pause&gt;'
+                             " />
       </xsl:element>
     </xsl:for-each>
   </xsl:element>
