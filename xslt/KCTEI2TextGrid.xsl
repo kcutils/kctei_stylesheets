@@ -54,26 +54,15 @@
 
   <xsl:variable name="punctuations_amount" select="count(/TEI/text/body/annotationBlock/u/pc)" />
 
-  <xsl:variable name="incidents_amount" select="count(/TEI/text/body/((vocal|pause)|annotationBlock/u/(pause|vocal))) + 2" />
-  <xsl:variable name="first_body_inci_start" select="if (/TEI/text/body/(pause|vocal)[1]/@start) then
-                                                        my:getIntervalById(/TEI,replace((/TEI/text/body/(pause|vocal))[1]/@start,'#', '')) else
-                                                        xs:integer(0)
-                                                    " />
-  <xsl:variable name="first_u_inci_start" select="if (/TEI/text/body/annotationBlock/u/(pause|vocal)[1]/@start) then
-                                                     my:getIntervalById(/TEI,replace((/TEI/text/body/annotationBlock/u/(pause|vocal))[1]/@start,'#', '')) else
-                                                     xs:integer(0)
-                                                 " />
-  <xsl:variable name="first_inci_start" select="min(($first_body_inci_start, $first_u_inci_start))" />
-
-  <xsl:variable name="last_body_inci_end" select="if (/TEI/text/body/(pause|vocal)[last()]/@end) then
-                                                     my:getIntervalById(/TEI,replace((/TEI/text/body/(pause|vocal))[last()]/@end,'#', '')) else
-                                                     xs:integer(0)
-                                                 " />
-  <xsl:variable name="last_u_inci_end" select="if (/TEI/text/body/annotationBlock/u/(pause|vocal)[last()]/@end) then
-                                                  my:getIntervalById(/TEI,replace((/TEI/text/body/annotationBlock/u/(pause|vocal))[last()]/@end,'#', '')) else
-                                                  xs:integer(0)
-                                              " />
-  <xsl:variable name="last_inci_end" select="max(($last_body_inci_end, $last_u_inci_end))" />
+  <xsl:variable name="incidents_amount" select="count(//(vocal|pause)) + 2" />
+  <xsl:variable name="first_inci_start" select="if (//(vocal|pause)[1]/@start) then
+                                                   my:getIntervalById(/TEI,replace(//(vocal|pause)[1]/@start, '#', '')) else
+                                                   xs:integer(0)
+                                               " />
+  <xsl:variable name="last_inci_end" select="if (//(vocal|pause)[last()]/@end) then
+                                                my:getIntervalById(/TEI,replace(//(vocal|pause)[last()]/@end, '#', '')) else
+                                                xs:integer(0)
+                                            " />
 
   <xsl:variable name="word_inc_amount" select="$word_amount + $incidents_amount" />
   <xsl:variable name="word_inc_start" select="min(($first_word_start, $first_inci_start))" />
