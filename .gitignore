@@ -3,3 +3,4 @@ data/*
 lib/*
 !lib/.gitkeep
 test/
+kctei_stylesheets.zip
