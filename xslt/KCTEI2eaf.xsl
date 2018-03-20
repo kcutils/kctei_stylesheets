@@ -5,11 +5,10 @@
 
   It produces six tiers:
 
-    - words
-    - non-verbal sounds
+    - words and non-verbal sounds
     - punctuations
-    - realized phones
-    - canonical phones
+    - realized phones and non-verbal sounds
+    - canonical phones and non-verbal sounds
     - prosodic labels
 
   All of these tiers are interval tiers, meaning that there cannot
@@ -76,7 +75,7 @@
   </xsl:element>
 </xsl:template>
 
-<xsl:template name="words_tier">
+<xsl:template name="words_inci_tier">
   <xsl:element name="TIER">
     <xsl:attribute name="LINGUISTIC_TYPE_REF">
       <xsl:text>default-lt</xsl:text>
@@ -84,56 +83,39 @@
     <xsl:attribute name="TIER_ID">
       <xsl:text>words</xsl:text>
     </xsl:attribute>
-    <xsl:for-each select="/TEI/text/body/annotationBlock/u/w">
+    <xsl:for-each select="(/TEI/text/body/annotationBlock/u/w)|//(vocal|pause)">
       <xsl:element name="ANNOTATION">
         <xsl:element name="ALIGNABLE_ANNOTATION">
           <xsl:attribute name="ANNOTATION_ID">
             <xsl:value-of select="./@xml:id" />
           </xsl:attribute>
-          <xsl:attribute name="TIME_SLOT_REF1">
-            <xsl:value-of select="replace(./@synch,'#','')" />
-          </xsl:attribute>
-          <xsl:attribute name="TIME_SLOT_REF2">
-            <xsl:value-of select="replace(following::anchor[1]/@synch,'#','')" />
-          </xsl:attribute>
-          <xsl:element name="ANNOTATION_VALUE">
-            <xsl:value-of select="." />
-          </xsl:element>
-        </xsl:element>
-      </xsl:element>
-    </xsl:for-each>
-  </xsl:element>
-</xsl:template>
-
-<xsl:template name="incidents_tier">
-  <xsl:element name="TIER">
-    <xsl:attribute name="LINGUISTIC_TYPE_REF">
-      <xsl:text>default-lt</xsl:text>
-    </xsl:attribute>
-    <xsl:attribute name="TIER_ID">
-      <xsl:text>incidents</xsl:text>
-    </xsl:attribute>
-    <xsl:for-each select="//(vocal|pause)">
-      <xsl:element name="ANNOTATION">
-        <xsl:element name="ALIGNABLE_ANNOTATION">
-          <xsl:attribute name="ANNOTATION_ID">
-<!--
-            <xsl:value-of select="./@xml:id" />
--->
-            <xsl:value-of select="generate-id()" />
-          </xsl:attribute>
-          <xsl:attribute name="TIME_SLOT_REF1">
-            <xsl:value-of select="replace(./@start,'#','')" />
-          </xsl:attribute>
-          <xsl:attribute name="TIME_SLOT_REF2">
-            <xsl:value-of select="replace(./@end,'#','')" />
-          </xsl:attribute>
-          <xsl:element name="ANNOTATION_VALUE">
-            <xsl:value-of select="if (name(.) = 'vocal') then
-                                     concat('&lt;', ./desc, '&gt;') else
-                                     '&lt;pause&gt;'
-                                 " />
-          </xsl:element>
+          <xsl:choose>
+            <xsl:when test="name(.) = 'w'">
+              <xsl:attribute name="TIME_SLOT_REF1">
+                <xsl:value-of select="replace(./@synch,'#','')" />
+              </xsl:attribute>
+              <xsl:attribute name="TIME_SLOT_REF2">
+                <xsl:value-of select="replace(following::anchor[1]/@synch,'#','')" />
+              </xsl:attribute>
+              <xsl:element name="ANNOTATION_VALUE">
+                <xsl:value-of select="." />
+              </xsl:element>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:attribute name="TIME_SLOT_REF1">
+                <xsl:value-of select="replace(./@start, '#', '')" />
+              </xsl:attribute>
+              <xsl:attribute name="TIME_SLOT_REF2">
+                <xsl:value-of select="replace(./@end, '#', '')" />
+              </xsl:attribute>
+              <xsl:element name="ANNOTATION_VALUE">
+                <xsl:value-of select="if (name(.) = 'vocal')             then
+                                          concat('&lt;', ./desc, '&gt;') else
+                                          '&lt;pause&gt;'
+                                     " />
+              </xsl:element>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:element>
       </xsl:element>
     </xsl:for-each>
@@ -172,7 +154,7 @@
   </xsl:element>
 </xsl:template>
 
-<xsl:template name="pho-realized_tier">
+<xsl:template name="pho-realized_inci_tier">
   <xsl:element name="TIER">
     <xsl:attribute name="LINGUISTIC_TYPE_REF">
       <xsl:text>default-lt</xsl:text>
@@ -180,20 +162,34 @@
     <xsl:attribute name="TIER_ID">
       <xsl:text>pho-realized</xsl:text>
     </xsl:attribute>
-    <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span">
+    <xsl:for-each select="(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span)|//(vocal|pause)">
       <xsl:element name="ANNOTATION">
         <xsl:element name="ALIGNABLE_ANNOTATION">
           <xsl:attribute name="ANNOTATION_ID">
-            <xsl:value-of select="./@xml:id" />
+            <xsl:value-of select="if (name(.) = 'span') then
+                                     ./@xml:id          else
+                                     generate-id(.)" />
           </xsl:attribute>
           <xsl:attribute name="TIME_SLOT_REF1">
-            <xsl:value-of select="replace(./@from,'#','')" />
+            <xsl:value-of select="if (name(.) = 'span')         then
+                                     replace(./@from,  '#', '') else
+                                     replace(./@start, '#', '')
+                                 " />
           </xsl:attribute>
           <xsl:attribute name="TIME_SLOT_REF2">
-            <xsl:value-of select="replace(./@to,'#','')" />
+            <xsl:value-of select="if (name(.) = 'span')         then
+                                     replace(./@to,  '#', '') else
+                                     replace(./@end, '#', '')
+                                 " />
           </xsl:attribute>
           <xsl:element name="ANNOTATION_VALUE">
-            <xsl:value-of select="." />
+            <xsl:value-of select="if (name(.) = 'span') then
+                                     .                  else
+                                     (if (name(.) = 'vocal') then
+                                         concat('&lt;', ./desc, '&gt;') else
+                                         '&lt;pause&gt;'
+                                     )
+                                 " />
           </xsl:element>
         </xsl:element>
       </xsl:element>
@@ -201,7 +197,7 @@
   </xsl:element>
 </xsl:template>
 
-<xsl:template name="pho-canonical_tier">
+<xsl:template name="pho-canonical_inci_tier">
   <xsl:element name="TIER">
     <xsl:attribute name="LINGUISTIC_TYPE_REF">
       <xsl:text>default-lt</xsl:text>
@@ -209,71 +205,96 @@
     <xsl:attribute name="TIER_ID">
       <xsl:text>pho-canonical</xsl:text>
     </xsl:attribute>
-    <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span">
+    <xsl:for-each select="(/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span)|//(vocal|pause)">
 
-      <xsl:variable name="from" select="./@from" />
-      <xsl:variable name="from_val" select="xs:integer(replace($from, '#T', ''))" />
-      <xsl:variable name="to" select="./@to" />
-      <xsl:variable name="to_val" select="xs:integer(replace($to, '#T', ''))" />
-      <xsl:variable name="word">
-        <xsl:for-each select="../../u/w">
-          <xsl:variable name="w_begin" select="@synch" />
-          <xsl:variable name="w_begin_val" select="xs:integer(replace($w_begin, '#T', ''))" />
-          <xsl:variable name="w_end" select="following::anchor[1]/@synch" />
-          <xsl:variable name="w_end_val" select="xs:integer(replace($w_end, '#T', ''))" />
-          <xsl:if test="$from_val ge $w_begin_val and
-                        $to_val   ge $w_begin_val and
-                        $from_val le $w_end_val   and
-                        $to_val   le $w_end_val">
-            <w begin="{$w_begin_val}" end="{$w_end_val}">
-              <xsl:value-of select="." />
-            </w>
+      <xsl:choose>
+        <xsl:when test="name(.) = 'span'">
+          <xsl:variable name="from" select="./@from" />
+          <xsl:variable name="from_val" select="xs:integer(replace($from, '#T', ''))" />
+          <xsl:variable name="to" select="./@to" />
+          <xsl:variable name="to_val" select="xs:integer(replace($to, '#T', ''))" />
+          <xsl:variable name="word">
+            <xsl:for-each select="../../u/w">
+              <xsl:variable name="w_begin" select="@synch" />
+              <xsl:variable name="w_begin_val" select="xs:integer(replace($w_begin, '#T', ''))" />
+              <xsl:variable name="w_end" select="following::anchor[1]/@synch" />
+              <xsl:variable name="w_end_val" select="xs:integer(replace($w_end, '#T', ''))" />
+              <xsl:if test="$from_val ge $w_begin_val and
+                            $to_val   ge $w_begin_val and
+                            $from_val le $w_end_val   and
+                            $to_val   le $w_end_val">
+                <w begin="{$w_begin_val}" end="{$w_end_val}">
+                  <xsl:value-of select="." />
+                </w>
+              </xsl:if>
+            </xsl:for-each>
+          </xsl:variable>
+          <xsl:variable name="word_from" select="$word/*[1]/@begin" as="xs:integer" />
+          <xsl:variable name="word_to" select="$word/*[1]/@end" as="xs:integer" />
+          <xsl:if test="$from != $to">
+            <xsl:element name="ANNOTATION">
+              <xsl:element name="ALIGNABLE_ANNOTATION">
+                <xsl:attribute name="ANNOTATION_ID">
+                  <xsl:value-of select="./@xml:id" />
+                </xsl:attribute>
+                <xsl:attribute name="TIME_SLOT_REF1">
+                  <xsl:value-of select="replace($from,'#','')" />
+                </xsl:attribute>
+                <xsl:attribute name="TIME_SLOT_REF2">
+                  <xsl:value-of select="replace($to,'#','')" />
+                </xsl:attribute>
+                <xsl:element name="ANNOTATION_VALUE">
+
+                  <!-- put all unrealized phones (from=to)
+                       in front of the current phone if they begin at the same time
+                       and if they belong to the same word as the current phone -->
+                  <xsl:for-each select="../*[./@from = $from and
+                                             ./@to   = $from and
+                                             xs:integer(replace(./@from, '#T', '')) eq $word_from and
+                                             xs:integer(replace(./@from, '#T', '')) le $word_to]">
+                    <xsl:value-of select="." />
+                    <xsl:text>_</xsl:text>
+                  </xsl:for-each>
+
+                  <xsl:value-of select="." />
+
+                  <!-- put all unrealized phones (from=to)
+                       after the current phone if they end at the same time
+                       and if they belong to the same word as the current phone -->
+                  <xsl:for-each select="../*[./@to   = $to and
+                                             ./@from = $to and
+                                             xs:integer(replace(./@to, '#T', '')) gt $word_from and
+                                             xs:integer(replace(./@to, '#T', '')) lt $word_to]">
+                    <xsl:text>_</xsl:text>
+                    <xsl:value-of select="." />
+                  </xsl:for-each>
+                </xsl:element>
+              </xsl:element>
+            </xsl:element>
           </xsl:if>
-        </xsl:for-each>
-      </xsl:variable>
-      <xsl:variable name="word_from" select="$word/*[1]/@begin" as="xs:integer" />
-      <xsl:variable name="word_to" select="$word/*[1]/@end" as="xs:integer" />
-      <xsl:if test="$from != $to">
-        <xsl:element name="ANNOTATION">
-          <xsl:element name="ALIGNABLE_ANNOTATION">
-            <xsl:attribute name="ANNOTATION_ID">
-              <xsl:value-of select="./@xml:id" />
-            </xsl:attribute>
-            <xsl:attribute name="TIME_SLOT_REF1">
-              <xsl:value-of select="replace($from,'#','')" />
-            </xsl:attribute>
-            <xsl:attribute name="TIME_SLOT_REF2">
-              <xsl:value-of select="replace($to,'#','')" />
-            </xsl:attribute>
-            <xsl:element name="ANNOTATION_VALUE">
-
-              <!-- put all unrealized phones (from=to)
-                   in front of the current phone if they begin at the same time
-                   and if they belong to the same word as the current phone -->
-              <xsl:for-each select="../*[./@from = $from and
-                                         ./@to   = $from and
-                                         xs:integer(replace(./@from, '#T', '')) eq $word_from and
-                                         xs:integer(replace(./@from, '#T', '')) le $word_to]">
-                <xsl:value-of select="." />
-                <xsl:text>_</xsl:text>
-              </xsl:for-each>
-
-              <xsl:value-of select="." />
-
-              <!-- put all unrealized phones (from=to)
-                   after the current phone if they end at the same time
-                   and if they belong to the same word as the current phone -->
-              <xsl:for-each select="../*[./@to   = $to and
-                                         ./@from = $to and
-                                         xs:integer(replace(./@to, '#T', '')) gt $word_from and
-                                         xs:integer(replace(./@to, '#T', '')) lt $word_to]">
-                <xsl:text>_</xsl:text>
-                <xsl:value-of select="." />
-              </xsl:for-each>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:element name="ANNOTATION">
+            <xsl:element name="ALIGNABLE_ANNOTATION">
+              <xsl:attribute name="ANNOTATION_ID">
+                <xsl:value-of select="generate-id(.)" />
+              </xsl:attribute>
+              <xsl:attribute name="TIME_SLOT_REF1">
+                <xsl:value-of select="replace(./@start,'#','')" />
+              </xsl:attribute>
+              <xsl:attribute name="TIME_SLOT_REF2">
+                <xsl:value-of select="replace(./@end,'#','')" />
+              </xsl:attribute>
+              <xsl:element name="ANNOTATION_VALUE">
+                <xsl:value-of select="if (name(.) = 'vocal') then
+                                         concat('&lt;', ./desc, '&gt;') else
+                                         '&lt;pause&gt;'
+                                     " />
+              </xsl:element>
             </xsl:element>
           </xsl:element>
-        </xsl:element>
-      </xsl:if>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:for-each>
   </xsl:element>
 </xsl:template>
@@ -394,11 +415,10 @@
     <xsl:call-template name="header" />
     <xsl:call-template name="timeline" />
 
-    <xsl:call-template name="words_tier" />
-    <xsl:call-template name="incidents_tier" />
+    <xsl:call-template name="words_inci_tier" />
     <xsl:call-template name="punctuations_tier" />
-    <xsl:call-template name="pho-realized_tier" />
-    <xsl:call-template name="pho-canonical_tier" />
+    <xsl:call-template name="pho-realized_inci_tier" />
+    <xsl:call-template name="pho-canonical_inci_tier" />
     <xsl:call-template name="prosody_tier" />
 
     <xsl:call-template name="footer" />
