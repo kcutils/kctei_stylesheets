@@ -3,7 +3,7 @@
 
   This stylesheet transforms Kiel Corpus ISO/TEO to eaf (ELAN).
 
-  It produces six tiers:
+  It produces five tiers:
 
     - words and non-verbal sounds
     - punctuations
