@@ -7,7 +7,7 @@
 
     - words and non-verbal sounds (interval tier)
     - punctuations (point tier)
-    - realized phones (interval tier)
+    - realized phones and non-verbal sounds (interval tier)
     - canonical phones (point tier)
     - prosodic labels (point tier)
 
@@ -56,11 +56,11 @@
 
   <xsl:variable name="incidents_amount" select="count(//(vocal|pause)) + 2" />
   <xsl:variable name="first_inci_start" select="if (//(vocal|pause)[1]/@start) then
-                                                   my:getIntervalById(/TEI,replace(//(vocal|pause)[1]/@start, '#', '')) else
+                                                   my:getIntervalById(/TEI,replace((//(vocal|pause))[1]/@start, '#', '')) else
                                                    xs:integer(0)
                                                " />
   <xsl:variable name="last_inci_end" select="if (//(vocal|pause)[last()]/@end) then
-                                                my:getIntervalById(/TEI,replace(//(vocal|pause)[last()]/@end, '#', '')) else
+                                                my:getIntervalById(/TEI,replace((//(vocal|pause))[last()]/@end, '#', '')) else
                                                 xs:integer(0)
                                             " />
 
@@ -244,8 +244,11 @@ item []:
                                        replace(./@end,'#', '')
                                    " />
     <xsl:variable name="text" select="if (name(.) = 'span') then
-                                         . else
-                                         ''
+                                         .                  else
+                                         (if (name(.) = 'vocal')            then
+                                             concat('&lt;', ./desc, '&gt;') else
+                                             '&lt;pause&gt;'
+                                         )
                                      " />
 
     <xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
