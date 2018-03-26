@@ -81,7 +81,7 @@
       <xsl:text>default-lt</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="TIER_ID">
-      <xsl:text>words</xsl:text>
+      <xsl:text>Wörter und Geräusche</xsl:text>
     </xsl:attribute>
     <xsl:for-each select="(/TEI/text/body/annotationBlock/u/w)|//(vocal|pause)">
       <xsl:element name="ANNOTATION">
@@ -111,7 +111,7 @@
               <xsl:element name="ANNOTATION_VALUE">
                 <xsl:value-of select="if (name(.) = 'vocal')             then
                                           concat('&lt;', ./desc, '&gt;') else
-                                          '&lt;pause&gt;'
+                                          '&lt;Pause&gt;'
                                      " />
               </xsl:element>
             </xsl:otherwise>
@@ -128,7 +128,7 @@
       <xsl:text>default-lt</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="TIER_ID">
-      <xsl:text>punctuations</xsl:text>
+      <xsl:text>Satzzeichen</xsl:text>
     </xsl:attribute>
     <xsl:for-each select="TEI/text/body/annotationBlock/u/pc">
       <xsl:element name="ANNOTATION">
@@ -160,7 +160,7 @@
       <xsl:text>default-lt</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="TIER_ID">
-      <xsl:text>pho-realized</xsl:text>
+      <xsl:text>Phonetik (realisiert)</xsl:text>
     </xsl:attribute>
     <xsl:for-each select="(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span)|//(vocal|pause)">
       <xsl:element name="ANNOTATION">
@@ -187,7 +187,7 @@
                                      .                  else
                                      (if (name(.) = 'vocal') then
                                          concat('&lt;', ./desc, '&gt;') else
-                                         '&lt;pause&gt;'
+                                         '&lt;Pause&gt;'
                                      )
                                  " />
           </xsl:element>
@@ -203,7 +203,7 @@
       <xsl:text>default-lt</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="TIER_ID">
-      <xsl:text>pho-canonical</xsl:text>
+      <xsl:text>Phonetik (kanonisch)</xsl:text>
     </xsl:attribute>
     <xsl:for-each select="(/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span)|//(vocal|pause)">
 
@@ -288,7 +288,7 @@
               <xsl:element name="ANNOTATION_VALUE">
                 <xsl:value-of select="if (name(.) = 'vocal') then
                                          concat('&lt;', ./desc, '&gt;') else
-                                         '&lt;pause&gt;'
+                                         '&lt;Pause&gt;'
                                      " />
               </xsl:element>
             </xsl:element>
@@ -305,7 +305,7 @@
       <xsl:text>default-lt</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="TIER_ID">
-      <xsl:text>prolab</xsl:text>
+      <xsl:text>Prosodie (PROLAB)</xsl:text>
     </xsl:attribute>
 
     <xsl:variable name="groups">

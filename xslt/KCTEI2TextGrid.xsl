@@ -98,7 +98,7 @@ item []:
 <xsl:template name="wordinc_header">
   <xsl:text>    item [1]:
         class = "IntervalTier" 
-        name = "words and incidents" 
+        name = "Wörter und Geräusche" 
         xmin = 0 
         xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
         intervals: size = </xsl:text><xsl:value-of select="$word_inc_amount" /><xsl:text>
@@ -120,7 +120,7 @@ item []:
 <xsl:template name="incident_header">
   <xsl:text>    item [2]:
         class = "IntervalTier" 
-        name = "incidents" 
+        name = "Geräusche" 
         xmin = 0 
         xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
         intervals: size = </xsl:text><xsl:value-of select="$incidents_amount" /><xsl:text>
@@ -142,7 +142,7 @@ item []:
 <xsl:template name="punctuations_header">
   <xsl:text>    item [2]:
         class = "TextTier" 
-        name = "punctuations" 
+        name = "Satzzeichen" 
         xmin = 0 
         xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
         points: size = </xsl:text><xsl:value-of select="$punctuations_amount" /><xsl:text>
@@ -152,7 +152,7 @@ item []:
 <xsl:template name="pho-realized_header">
   <xsl:text>    item [3]:
         class = "IntervalTier" 
-        name = "pho-realized" 
+        name = "Phonetik (realisiert)"
         xmin = 0 
         xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
         intervals: size = </xsl:text><xsl:value-of select="$pho-realized_amount" /><xsl:text>
@@ -174,7 +174,7 @@ item []:
 <xsl:template name="pho-canonical_header">
   <xsl:text>    item [4]:
         class = "TextTier"
-        name = "pho-canonical"
+        name = "Phonetik (kanonisch)"
         xmin = 0
         xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
         points: size = </xsl:text><xsl:value-of select="$pho-canonical_amount" /><xsl:text>
@@ -202,7 +202,7 @@ item []:
                                          .               else
                                          (if (name(.) = 'vocal')            then
                                              concat('&lt;', ./desc, '&gt;') else
-                                             '&lt;pause&gt;'
+                                             '&lt;Pause&gt;'
                                          )
                                      " />
 
@@ -247,7 +247,7 @@ item []:
                                          .                  else
                                          (if (name(.) = 'vocal')            then
                                              concat('&lt;', ./desc, '&gt;') else
-                                             '&lt;pause&gt;'
+                                             '&lt;Pause&gt;'
                                          )
                                      " />
 
@@ -321,7 +321,7 @@ item []:
   <!-- header for prosodic tier -->
   <xsl:text>    item [5]:
         class = "TextTier"
-        name = "prolab"
+        name = "Prosodie (PROLAB)"
         xmin = 0
         xmax = </xsl:text><xsl:value-of select="if ($prosodic_labels/*[last()]/@point) then
                                                     $prosodic_labels/*[last()]/@point  else

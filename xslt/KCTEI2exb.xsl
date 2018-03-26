@@ -80,7 +80,7 @@
       <xsl:text>TIE0</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="category">
-      <xsl:text>words</xsl:text>
+      <xsl:text>Wörter und Geräusche</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
       <xsl:text>t</xsl:text>
@@ -106,7 +106,7 @@
                                   .              else
                                  (if (name(.) = 'vocal') then
                                      concat('&lt;', ./desc, '&gt;') else
-                                     '&lt;pause&gt;'
+                                     '&lt;Pause&gt;'
                                  )
                              " />
       </xsl:element>
@@ -120,7 +120,7 @@
       <xsl:text>TIE2</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="category">
-      <xsl:text>punctuations</xsl:text>
+      <xsl:text>Satzzeichen</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
       <xsl:text>d</xsl:text>
@@ -150,7 +150,7 @@
       <xsl:text>TIE3</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="category">
-      <xsl:text>pho-realized</xsl:text>
+      <xsl:text>Phonetik (realisiert)</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
       <xsl:text>a</xsl:text>
@@ -175,7 +175,7 @@
                                   .              else
                                  (if (name(.) = 'vocal') then
                                      concat('&lt;', ./desc, '&gt;') else
-                                     '&lt;pause&gt;'
+                                     '&lt;Pause&gt;'
                                  )
                              " />
       </xsl:element>
@@ -189,7 +189,7 @@
       <xsl:text>TIE4</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="category">
-      <xsl:text>pho-canonical</xsl:text>
+      <xsl:text>Phonetik (kanonisch)</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
       <xsl:text>a</xsl:text>
@@ -267,7 +267,7 @@
             </xsl:attribute>
             <xsl:value-of select="if (name(.) = 'vocal') then
                                      concat('&lt;', ./desc, '&gt;') else
-                                     '&lt;pause&gt;'
+                                     '&lt;Pause&gt;'
                                  " />
           </xsl:element>
         </xsl:otherwise>
@@ -282,7 +282,7 @@
       <xsl:text>TIE5</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="category">
-      <xsl:text>prolab</xsl:text>
+      <xsl:text>Prosodie (PROLAB)</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="type">
       <xsl:text>a</xsl:text>
