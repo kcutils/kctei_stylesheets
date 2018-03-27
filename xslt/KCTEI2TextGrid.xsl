@@ -49,8 +49,14 @@
   <xsl:variable name="last_timeline_entry" select="max(/TEI/text/front/timeline/when/@interval)" />
 
   <xsl:variable name="word_amount" select="count(/TEI/text/body/annotationBlock/u/w)" />
-  <xsl:variable name="first_word_start" select="my:getIntervalById(/TEI,replace(/TEI/text/body/annotationBlock[1]/u/w[1]/@synch,'#', ''))" />
-  <xsl:variable name="last_word_end" select="my:getIntervalById(/TEI,replace((/TEI/text/body/annotationBlock[last()]/u/anchor)[last()]/@synch,'#', ''))" />
+  <xsl:variable name="first_word_start" select="if ((//w)[1]/@synch) then
+                                                   my:getIntervalById(/TEI,replace((//w)[1]/@synch,'#', '')) else
+                                                   xs:integer(0)
+                                               " />
+  <xsl:variable name="last_word_end" select="if ((//anchor)[last()]/@synch) then
+                                                my:getIntervalById(/TEI,replace((//anchor)[last()]/@synch,'#', '')) else
+                                                xs:integer(0)
+                                            " />
 
   <xsl:variable name="punctuations_amount" select="count(/TEI/text/body/annotationBlock/u/pc)" />
 
@@ -69,8 +75,14 @@
   <xsl:variable name="word_inc_end" select="max(($last_word_end, $last_inci_end))" />
 
   <xsl:variable name="pho-realized_amount" select="count(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span) + $incidents_amount" />
-  <xsl:variable name="pho-realized_first_from" select="my:getIntervalById(/TEI,replace(/TEI/text/body/annotationBlock[1]/spanGrp[@type='pho-realized'][1]/span[1]/@from,'#', ''))" />
-  <xsl:variable name="pho-realized_last_to" select="my:getIntervalById(/TEI,replace(/TEI/text/body/annotationBlock[last()]/spanGrp[@type='pho-realized'][last()]/span[last()]/@to,'#', ''))" />
+  <xsl:variable name="pho-realized_first_from" select="if ((//spanGrp[@type='pho-realized'])[1]/span[1]/@from) then
+                                                          my:getIntervalById(/TEI,replace((//spanGrp[@type='pho-realized'])[1]/span[1]/@from,'#', '')) else
+                                                          xs:integer(0)
+                                                      " />
+  <xsl:variable name="pho-realized_last_to" select="if ((//spanGrp[@type='pho-realized'])[last()]/span[last()]/@to) then
+                                                       my:getIntervalById(/TEI,replace((//spanGrp[@type='pho-realized'])[last()]/span[last()]/@to,'#', '')) else
+                                                       xs:integer(0)
+                                                   " />
 
   <xsl:variable name="first_pho-realized_from" select="min(($pho-realized_first_from, $first_inci_start ))" />
   <xsl:variable name="last_pho-realized_to" select="max(($pho-realized_last_to, $last_inci_end))" />
@@ -300,15 +312,8 @@ item []:
         <xsl:for-each select="*">
           <xsl:variable name="text" select="."/>
           <xsl:value-of select="$text"/>
-          <xsl:if test="position() != last()">
-            <xsl:choose>
-              <xsl:when test="contains($text, 'PG')">
-                <xsl:text>    </xsl:text>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:text>_</xsl:text>
-              </xsl:otherwise>
-            </xsl:choose>
+          <xsl:if test="position() != last() and contains($text, 'PG')">
+            <xsl:text>_</xsl:text>
           </xsl:if>
         </xsl:for-each>
 

@@ -358,15 +358,8 @@
             <xsl:for-each select="*">
               <xsl:variable name="text" select="."/>
               <xsl:value-of select="$text"/>
-              <xsl:if test="position() != last()">
-                <xsl:choose>
-                  <xsl:when test="contains($text, 'PG')">
-                    <xsl:text>    </xsl:text>
-                  </xsl:when>
-                  <xsl:otherwise>
-                    <xsl:text>_</xsl:text>
-                  </xsl:otherwise>
-                </xsl:choose>
+              <xsl:if test="position() != last() and contains($text, 'PG')">
+                <xsl:text>_</xsl:text>
               </xsl:if>
             </xsl:for-each>
           </xsl:element>
