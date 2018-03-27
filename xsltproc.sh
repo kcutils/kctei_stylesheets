@@ -7,7 +7,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-SAXON_JAR="lib/saxon9he.jar"
+SCRIPT=$( readlink -f "$0" )
+SCRIPT_PATH=$( dirname "$SCRIPT" )
+
+SAXON_JAR="${SCRIPT_PATH}/lib/saxon9he.jar"
 
 if [ ! -f "$SAXON_JAR" ]; then
   echo "Saxon JAR file not found! Exiting ..."
