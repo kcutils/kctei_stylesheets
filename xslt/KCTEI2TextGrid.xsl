@@ -7,8 +7,8 @@
 
     - words and non-verbal sounds (interval tier)
     - punctuations (point tier)
-    - realized phones and non-verbal sounds (interval tier)
     - canonical phones (point tier)
+    - realized phones and non-verbal sounds (interval tier)
     - prosodic labels (point tier)
 
   Canonical phones are on a point tier since they contain unrealized phones
@@ -87,8 +87,6 @@
   <xsl:variable name="first_pho-realized_from" select="min(($pho-realized_first_from, $first_inci_start ))" />
   <xsl:variable name="last_pho-realized_to" select="max(($pho-realized_last_to, $last_inci_end))" />
 
-  <xsl:variable name="pho-canonical_amount" select="count(/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span)" />
-
   <xsl:function name="my:getIntervalById">
     <xsl:param name="root_node" />
     <xsl:param name="ID" />
@@ -162,7 +160,7 @@ item []:
 </xsl:template>
 
 <xsl:template name="pho-realized_header">
-  <xsl:text>    item [3]:
+  <xsl:text>    item [4]:
         class = "IntervalTier" 
         name = "Phonetik (realisiert)"
         xmin = 0 
@@ -180,16 +178,6 @@ item []:
             xmin = </xsl:text><xsl:value-of select="$last_pho-realized_to" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
             text = &quot;&quot;
-</xsl:text>
-</xsl:template>
-
-<xsl:template name="pho-canonical_header">
-  <xsl:text>    item [4]:
-        class = "TextTier"
-        name = "Phonetik (kanonisch)"
-        xmin = 0
-        xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
-        points: size = </xsl:text><xsl:value-of select="$pho-canonical_amount" /><xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -241,54 +229,93 @@ item []:
 </xsl:text>
   </xsl:for-each>
 
+  <!-- build tier of canonical phones -->
+
+  <xsl:variable name="canon_phones">
+    <xsl:for-each-group select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span" group-by="@from">
+      <xsl:variable name="point" select ="my:getIntervalById(/TEI,replace(current-grouping-key(),'#',''))" />
+      <group point="{$point}">
+        <xsl:copy-of select="current-group()" />
+      </group>
+    </xsl:for-each-group>
+  </xsl:variable>
+
+  <xsl:variable name="canon_phone_labels">
+    <xsl:for-each select="$canon_phones/*">
+      <xsl:variable name="previous_group_size" select="count(preceding-sibling::group[1]/*)" />
+      <entry point="{@point}">
+        <xsl:text>        points [</xsl:text><xsl:value-of select="$previous_group_size + position()"/><xsl:text>]:
+              num = </xsl:text><xsl:value-of select="@point"/><xsl:text>
+              text = &quot;</xsl:text>
+
+        <xsl:for-each select="*">
+          <xsl:variable name="text" select="."/>
+          <xsl:value-of select="$text"/>
+<!--          <xsl:if test="position() != last()">
+            <xsl:text>_</xsl:text>
+          </xsl:if>
+-->
+        </xsl:for-each>
+
+        <xsl:text>&quot;
+</xsl:text>
+      </entry>
+    </xsl:for-each>
+  </xsl:variable>
+
+  <!-- header for canonical phones tier -->
+  <xsl:text>    item [3]:
+        class = "TextTier"
+        name = "Phonetik (kanonisch)"
+        xmin = 0
+        xmax = </xsl:text><xsl:value-of select="if ($canon_phone_labels/*[last()]/@point) then
+                                                    $canon_phone_labels/*[last()]/@point  else
+                                                    xs:integer(0)
+                                               " /><xsl:text>
+        points: size = </xsl:text><xsl:value-of select="count($canon_phone_labels/*)" /><xsl:text>
+</xsl:text>
+
+  <xsl:for-each select="$canon_phone_labels/*">
+    <xsl:value-of select="."/>
+  </xsl:for-each>
+
   <!-- build tier of realized phones -->
 
   <xsl:call-template name="pho-realized_header" />
 
-  <xsl:for-each select="/TEI/text/body/((vocal|pause)|annotationBlock/(spanGrp[@type='pho-realized']/span|u/(vocal|pause)))">
-    <xsl:variable name="current_interval" select="position() + 1"/>
-    <xsl:variable name="from" select="if (name(.) = 'span')       then
-                                         replace(./@from,'#', '') else
-                                         replace(./@start,'#', '')
+  <xsl:variable name="real_phones">
+    <xsl:for-each select="/TEI/text/body/((vocal|pause)|annotationBlock/(spanGrp[@type='pho-realized']/span|u/(vocal|pause)))">
+      <xsl:variable name="from" select="if (name(.) = 'span')       then
+                                           replace(./@from,'#', '') else
+                                           replace(./@start,'#', '')
+                                       " />
+      <xsl:variable name="to" select="if (name(.) = 'span')     then
+                                         replace(./@to,'#', '') else
+                                         replace(./@end,'#', '')
                                      " />
-    <xsl:variable name="to" select="if (name(.) = 'span')     then
-                                       replace(./@to,'#', '') else
-                                       replace(./@end,'#', '')
-                                   " />
-    <xsl:variable name="text" select="if (name(.) = 'span') then
-                                         .                  else
-                                         (if (name(.) = 'vocal')            then
-                                             concat('&lt;', ./desc, '&gt;') else
-                                             '&lt;Pause&gt;'
-                                         )
-                                     " />
+      <xsl:variable name="text" select="if (name(.) = 'span') then
+                                           .                  else
+                                           (if (name(.) = 'vocal')            then
+                                               concat('&lt;', ./desc, '&gt;') else
+                                               '&lt;Pause&gt;'
+                                           )
+                                       " />
+      <phone from="{my:getIntervalById(/TEI,$from)}" to="{my:getIntervalById(/TEI,$to)}">
+        <xsl:value-of select="$text" />
+      </phone>
+    </xsl:for-each>
+  </xsl:variable>
 
-    <xsl:text>        intervals [</xsl:text><xsl:value-of select="$current_interval" /><xsl:text>]:
-            xmin = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$from)" /><xsl:text>
-            xmax = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$to)" /><xsl:text>
-            text = &quot;</xsl:text><xsl:value-of select="$text" /><xsl:text>&quot;
+  <xsl:for-each select="$real_phones/*">
+    <xsl:sort select="@from" data-type="number" />
+    <xsl:text>        intervals [</xsl:text><xsl:value-of select="position() + 1" /><xsl:text>]:
+            xmin = </xsl:text><xsl:value-of select="@from" /><xsl:text>
+            xmax = </xsl:text><xsl:value-of select="@to" /><xsl:text>
+            text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
   </xsl:for-each>
 
   <xsl:call-template name="pho-realized_footer" />
-
-  <!-- build tier of canonical phones -->
-
-  <xsl:call-template name="pho-canonical_header" />
-
-  <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span">
-    <xsl:variable name="current_point" select="position()"/>
-    <xsl:variable name="from_id" select="replace(./@from,'#', '')" />
-    <xsl:variable name="to_id" select="replace(./@to,'#', '')" />
-    <xsl:variable name="from" select="my:getIntervalById(/TEI,$from_id)" />
-    <xsl:variable name="to" select="my:getIntervalById(/TEI,$to_id)" />
-    <xsl:variable name="point" select="($to - $from) div 2 + $from" />
-
-    <xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
-            num = </xsl:text><xsl:value-of select="$point" /><xsl:text>
-            text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
-</xsl:text>
-  </xsl:for-each>
 
   <!-- build tier of prosodic information -->
 
