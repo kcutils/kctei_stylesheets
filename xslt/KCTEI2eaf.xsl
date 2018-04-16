@@ -7,8 +7,8 @@
 
     - words and non-verbal sounds
     - punctuations
-    - realized phones and non-verbal sounds
     - canonical phones and non-verbal sounds
+    - realized phones and non-verbal sounds
     - prosodic labels
 
   All of these tiers are interval tiers, meaning that there cannot
@@ -154,49 +154,6 @@
   </xsl:element>
 </xsl:template>
 
-<xsl:template name="pho-realized_inci_tier">
-  <xsl:element name="TIER">
-    <xsl:attribute name="LINGUISTIC_TYPE_REF">
-      <xsl:text>default-lt</xsl:text>
-    </xsl:attribute>
-    <xsl:attribute name="TIER_ID">
-      <xsl:text>Phonetik (realisiert)</xsl:text>
-    </xsl:attribute>
-    <xsl:for-each select="(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span)|//(vocal|pause)">
-      <xsl:element name="ANNOTATION">
-        <xsl:element name="ALIGNABLE_ANNOTATION">
-          <xsl:attribute name="ANNOTATION_ID">
-            <xsl:value-of select="if (name(.) = 'span') then
-                                     ./@xml:id          else
-                                     generate-id(.)" />
-          </xsl:attribute>
-          <xsl:attribute name="TIME_SLOT_REF1">
-            <xsl:value-of select="if (name(.) = 'span')         then
-                                     replace(./@from,  '#', '') else
-                                     replace(./@start, '#', '')
-                                 " />
-          </xsl:attribute>
-          <xsl:attribute name="TIME_SLOT_REF2">
-            <xsl:value-of select="if (name(.) = 'span')         then
-                                     replace(./@to,  '#', '') else
-                                     replace(./@end, '#', '')
-                                 " />
-          </xsl:attribute>
-          <xsl:element name="ANNOTATION_VALUE">
-            <xsl:value-of select="if (name(.) = 'span') then
-                                     .                  else
-                                     (if (name(.) = 'vocal') then
-                                         concat('&lt;', ./desc, '&gt;') else
-                                         '&lt;Pause&gt;'
-                                     )
-                                 " />
-          </xsl:element>
-        </xsl:element>
-      </xsl:element>
-    </xsl:for-each>
-  </xsl:element>
-</xsl:template>
-
 <xsl:template name="pho-canonical_inci_tier">
   <xsl:element name="TIER">
     <xsl:attribute name="LINGUISTIC_TYPE_REF">
@@ -295,6 +252,49 @@
           </xsl:element>
         </xsl:otherwise>
       </xsl:choose>
+    </xsl:for-each>
+  </xsl:element>
+</xsl:template>
+
+<xsl:template name="pho-realized_inci_tier">
+  <xsl:element name="TIER">
+    <xsl:attribute name="LINGUISTIC_TYPE_REF">
+      <xsl:text>default-lt</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="TIER_ID">
+      <xsl:text>Phonetik (realisiert)</xsl:text>
+    </xsl:attribute>
+    <xsl:for-each select="(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span)|//(vocal|pause)">
+      <xsl:element name="ANNOTATION">
+        <xsl:element name="ALIGNABLE_ANNOTATION">
+          <xsl:attribute name="ANNOTATION_ID">
+            <xsl:value-of select="if (name(.) = 'span') then
+                                     ./@xml:id          else
+                                     generate-id(.)" />
+          </xsl:attribute>
+          <xsl:attribute name="TIME_SLOT_REF1">
+            <xsl:value-of select="if (name(.) = 'span')         then
+                                     replace(./@from,  '#', '') else
+                                     replace(./@start, '#', '')
+                                 " />
+          </xsl:attribute>
+          <xsl:attribute name="TIME_SLOT_REF2">
+            <xsl:value-of select="if (name(.) = 'span')         then
+                                     replace(./@to,  '#', '') else
+                                     replace(./@end, '#', '')
+                                 " />
+          </xsl:attribute>
+          <xsl:element name="ANNOTATION_VALUE">
+            <xsl:value-of select="if (name(.) = 'span') then
+                                     .                  else
+                                     (if (name(.) = 'vocal') then
+                                         concat('&lt;', ./desc, '&gt;') else
+                                         '&lt;Pause&gt;'
+                                     )
+                                 " />
+          </xsl:element>
+        </xsl:element>
+      </xsl:element>
     </xsl:for-each>
   </xsl:element>
 </xsl:template>
@@ -410,8 +410,8 @@
 
     <xsl:call-template name="words_inci_tier" />
     <xsl:call-template name="punctuations_tier" />
-    <xsl:call-template name="pho-realized_inci_tier" />
     <xsl:call-template name="pho-canonical_inci_tier" />
+    <xsl:call-template name="pho-realized_inci_tier" />
     <xsl:call-template name="prosody_tier" />
 
     <xsl:call-template name="footer" />
