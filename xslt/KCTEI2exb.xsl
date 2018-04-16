@@ -7,8 +7,8 @@
 
     - words with non-verbal sounds
     - punctuations
-    - realized phones with non-verbal sounds
     - canonical phones with non-verbal sounds
+    - realized phones with non-verbal sounds
     - prosodic labels
 
   All of these tiers are interval tiers, meaning that there cannot
@@ -144,45 +144,6 @@
   </xsl:element>
 </xsl:template>
 
-<xsl:template name="pho-realized_inci_tier">
-  <xsl:element name="tier">
-    <xsl:attribute name="id">
-      <xsl:text>TIE3</xsl:text>
-    </xsl:attribute>
-    <xsl:attribute name="category">
-      <xsl:text>Phonetik (realisiert)</xsl:text>
-    </xsl:attribute>
-    <xsl:attribute name="type">
-      <xsl:text>a</xsl:text>
-    </xsl:attribute>
-    <xsl:attribute name="display-name">
-      <xsl:text>[pho-realized]</xsl:text>
-    </xsl:attribute>
-    <xsl:for-each select="(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span)|//(vocal|pause)">
-      <xsl:element name="event">
-        <xsl:attribute name="start">
-          <xsl:value-of select="if (name(.) = 'span')      then
-                                   replace(./@from, '#','') else
-                                   replace(./@start,'#','')
-                               " />
-        </xsl:attribute>
-        <xsl:attribute name="end">
-          <xsl:value-of select="if (name(.) = 'span')    then
-                                   replace(./@to, '#','') else
-                                   replace(./@end,'#','')" />
-        </xsl:attribute>
-        <xsl:value-of select="if (name(.) = 'span') then
-                                  .              else
-                                 (if (name(.) = 'vocal') then
-                                     concat('&lt;', ./desc, '&gt;') else
-                                     '&lt;Pause&gt;'
-                                 )
-                             " />
-      </xsl:element>
-    </xsl:for-each>
-  </xsl:element>
-</xsl:template>
-
 <xsl:template name="pho-canonical_inci_tier">
   <xsl:element name="tier">
     <xsl:attribute name="id">
@@ -276,6 +237,45 @@
   </xsl:element>
 </xsl:template>
 
+<xsl:template name="pho-realized_inci_tier">
+  <xsl:element name="tier">
+    <xsl:attribute name="id">
+      <xsl:text>TIE3</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="category">
+      <xsl:text>Phonetik (realisiert)</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="type">
+      <xsl:text>a</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="display-name">
+      <xsl:text>[pho-realized]</xsl:text>
+    </xsl:attribute>
+    <xsl:for-each select="(/TEI/text/body/annotationBlock/spanGrp[@type='pho-realized']/span)|//(vocal|pause)">
+      <xsl:element name="event">
+        <xsl:attribute name="start">
+          <xsl:value-of select="if (name(.) = 'span')      then
+                                   replace(./@from, '#','') else
+                                   replace(./@start,'#','')
+                               " />
+        </xsl:attribute>
+        <xsl:attribute name="end">
+          <xsl:value-of select="if (name(.) = 'span')    then
+                                   replace(./@to, '#','') else
+                                   replace(./@end,'#','')" />
+        </xsl:attribute>
+        <xsl:value-of select="if (name(.) = 'span') then
+                                  .              else
+                                 (if (name(.) = 'vocal') then
+                                     concat('&lt;', ./desc, '&gt;') else
+                                     '&lt;Pause&gt;'
+                                 )
+                             " />
+      </xsl:element>
+    </xsl:for-each>
+  </xsl:element>
+</xsl:template>
+
 <xsl:template name="prosody_tier">
   <xsl:element name="tier">
     <xsl:attribute name="id">
@@ -353,8 +353,8 @@
       <xsl:call-template name="timeline" />
       <xsl:call-template name="words_inci_tier" />
       <xsl:call-template name="punctuations_tier" />
-      <xsl:call-template name="pho-realized_inci_tier" />
       <xsl:call-template name="pho-canonical_inci_tier" />
+      <xsl:call-template name="pho-realized_inci_tier" />
       <xsl:call-template name="prosody_tier" />
     </xsl:element>
   </xsl:element>
