@@ -221,7 +221,7 @@ item []:
 
   <xsl:for-each select="/TEI/text/body/annotationBlock/u/pc">
     <xsl:variable name="current_point" select="position()"/>
-    <xsl:variable name="end" select="replace(./../../@end,'#', '')" />
+    <xsl:variable name="end" select="replace(preceding-sibling::anchor[1]/@synch,'#','')" />
 
     <xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
             num = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$end)" /><xsl:text>
