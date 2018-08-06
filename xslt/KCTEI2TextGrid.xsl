@@ -233,7 +233,9 @@ item []:
 
   <xsl:variable name="canon_phones">
     <xsl:for-each-group select="/TEI/text/body/annotationBlock/spanGrp[@type='pho-canonical']/span" group-by="@from">
-      <xsl:variable name="point" select ="my:getIntervalById(/TEI,replace(current-grouping-key(),'#',''))" />
+      <xsl:variable name="from" select ="my:getIntervalById(/TEI,replace(current-grouping-key(),'#',''))" />
+      <xsl:variable name="to" select ="my:getIntervalById(/TEI,replace(current-group()[last()]/@to,'#',''))" />
+      <xsl:variable name="point" select ="$from + (($to - $from) div 2)" />
       <group point="{$point}">
         <xsl:copy-of select="current-group()" />
       </group>
