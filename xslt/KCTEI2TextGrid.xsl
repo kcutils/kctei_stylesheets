@@ -9,6 +9,7 @@
     - punctuations (point tier)
     - canonical phones (point tier)
     - realized phones and non-verbal sounds (interval tier)
+    - misc labels (point tier)
     - prosodic labels (point tier)
 
   Canonical phones are on a point tier since they contain unrealized phones
@@ -100,7 +101,7 @@ Object class = "TextGrid"
 xmin = 0
 xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
 tiers? &lt;exists&gt;
-size = 5
+size = 6
 item []:
 </xsl:text>
 </xsl:template>
@@ -319,6 +320,52 @@ item []:
 
   <xsl:call-template name="pho-realized_footer" />
 
+  <!-- build tier of misc labels -->
+
+  <xsl:variable name="misc">
+    <xsl:for-each-group select="/TEI/text/body/annotationBlock/spanGrp[@type='misc']/span" group-by="@from">
+      <xsl:variable name="point" select ="my:getIntervalById(/TEI,replace(current-grouping-key(),'#',''))" />
+      <group point="{$point}">
+        <xsl:copy-of select="current-group()" />
+      </group>
+    </xsl:for-each-group>
+  </xsl:variable>
+
+  <xsl:variable name="misc_labels">
+    <xsl:for-each select="$misc/*">
+      <xsl:variable name="previous_group_size" select="count(preceding-sibling::group[1]/*)" />
+      <entry point="{@point}">
+        <xsl:text>        points [</xsl:text><xsl:value-of select="$previous_group_size + position()"/><xsl:text>]:
+              num = </xsl:text><xsl:value-of select="@point"/><xsl:text>
+              text = &quot;</xsl:text>
+
+        <xsl:for-each select="*">
+          <xsl:variable name="text" select="."/>
+          <xsl:value-of select="$text"/>
+        </xsl:for-each>
+
+        <xsl:text>&quot;
+</xsl:text>
+      </entry>
+    </xsl:for-each>
+  </xsl:variable>
+
+  <!-- header for misc labels tier -->
+  <xsl:text>    item [5]:
+        class = "TextTier"
+        name = "Misc"
+        xmin = 0
+        xmax = </xsl:text><xsl:value-of select="if ($misc_labels/*[last()]/@point) then
+                                                    $misc_labels/*[last()]/@point  else
+                                                    xs:integer(0)
+                                               " /><xsl:text>
+        points: size = </xsl:text><xsl:value-of select="count($misc_labels/*)" /><xsl:text>
+</xsl:text>
+
+  <xsl:for-each select="$misc_labels/*">
+    <xsl:value-of select="."/>
+  </xsl:for-each>
+
   <!-- build tier of prosodic information -->
 
   <xsl:variable name="groups">
@@ -353,7 +400,7 @@ item []:
   </xsl:variable>
 
   <!-- header for prosodic tier -->
-  <xsl:text>    item [5]:
+  <xsl:text>    item [6]:
         class = "TextTier"
         name = "Prosodie (PROLAB)"
         xmin = 0
