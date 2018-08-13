@@ -9,6 +9,7 @@
     - punctuations
     - canonical phones and non-verbal sounds
     - realized phones and non-verbal sounds
+    - misc labels (MA mark)
     - prosodic labels
 
   All of these tiers are interval tiers, meaning that there cannot
@@ -299,6 +300,51 @@
   </xsl:element>
 </xsl:template>
 
+<xsl:template name="misc_tier">
+  <xsl:element name="TIER">
+    <xsl:attribute name="LINGUISTIC_TYPE_REF">
+      <xsl:text>default-lt</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="TIER_ID">
+      <xsl:text>Misc</xsl:text>
+    </xsl:attribute>
+    <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='misc']/span">
+      <xsl:element name="ANNOTATION">
+        <xsl:element name="ALIGNABLE_ANNOTATION">
+          <xsl:attribute name="ANNOTATION_ID">
+            <xsl:value-of select="./@xml:id" />
+          </xsl:attribute>
+
+          <xsl:variable name="from" select="replace(./@from,'#','')" />
+          <xsl:variable name="end" select="replace(./@to,'#','')" />
+
+          <xsl:attribute name="TIME_SLOT_REF1">
+            <xsl:value-of select="$from" />
+          </xsl:attribute>
+          <xsl:choose>
+            <xsl:when test="$from != $end">
+              <xsl:attribute name="TIME_SLOT_REF2">
+                <xsl:value-of select="$from" />
+              </xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+              <!-- we need some extension in time,
+                   so take the last time mark
+                -->
+              <xsl:attribute name="TIME_SLOT_REF2">
+                <xsl:value-of select="concat('T', xs:integer(replace($end,'T','')) + 1)" />
+              </xsl:attribute>
+            </xsl:otherwise>
+          </xsl:choose>
+          <xsl:element name="ANNOTATION_VALUE">
+            <xsl:value-of select="." />
+          </xsl:element>
+        </xsl:element>
+      </xsl:element>
+    </xsl:for-each>
+  </xsl:element>
+</xsl:template>
+
 <xsl:template name="prosody_tier">
   <xsl:element name="TIER">
     <xsl:attribute name="LINGUISTIC_TYPE_REF">
@@ -412,6 +458,7 @@
     <xsl:call-template name="punctuations_tier" />
     <xsl:call-template name="pho-canonical_inci_tier" />
     <xsl:call-template name="pho-realized_inci_tier" />
+    <xsl:call-template name="misc_tier" />
     <xsl:call-template name="prosody_tier" />
 
     <xsl:call-template name="footer" />
