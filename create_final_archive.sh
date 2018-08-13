@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 SCRIPT=$( readlink -f "$0" )
 SCRIPT_PATH=$( dirname "$SCRIPT" )
