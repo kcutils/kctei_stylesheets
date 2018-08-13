@@ -324,7 +324,7 @@
           <xsl:choose>
             <xsl:when test="$from != $end">
               <xsl:attribute name="TIME_SLOT_REF2">
-                <xsl:value-of select="$from" />
+                <xsl:value-of select="$end" />
               </xsl:attribute>
             </xsl:when>
             <xsl:otherwise>
