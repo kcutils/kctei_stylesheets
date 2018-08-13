@@ -9,6 +9,7 @@
     - punctuations
     - canonical phones with non-verbal sounds
     - realized phones with non-verbal sounds
+    - misc labels (MA mark)
     - prosodic labels
 
   All of these tiers are interval tiers, meaning that there cannot
@@ -117,7 +118,7 @@
 <xsl:template name="punctuations_tier">
   <xsl:element name="tier">
     <xsl:attribute name="id">
-      <xsl:text>TIE2</xsl:text>
+      <xsl:text>TIE1</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="category">
       <xsl:text>Satzzeichen</xsl:text>
@@ -147,7 +148,7 @@
 <xsl:template name="pho-canonical_inci_tier">
   <xsl:element name="tier">
     <xsl:attribute name="id">
-      <xsl:text>TIE4</xsl:text>
+      <xsl:text>TIE2</xsl:text>
     </xsl:attribute>
     <xsl:attribute name="category">
       <xsl:text>Phonetik (kanonisch)</xsl:text>
@@ -276,6 +277,47 @@
   </xsl:element>
 </xsl:template>
 
+<xsl:template name="misc_tier">
+  <xsl:element name="tier">
+    <xsl:attribute name="id">
+      <xsl:text>TIE4</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="category">
+      <xsl:text>Misc</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="type">
+      <xsl:text>d</xsl:text>
+    </xsl:attribute>
+    <xsl:attribute name="display-name">
+      <xsl:text>[misc]</xsl:text>
+    </xsl:attribute>
+    <xsl:for-each select="/TEI/text/body/annotationBlock/spanGrp[@type='misc']/span">
+      <xsl:element name="event">
+        <xsl:variable name="from" select="replace(./@from,'#','')" />
+        <xsl:variable name="end" select ="replace(./@to,'#','')" />
+        <xsl:attribute name="start">
+          <xsl:value-of select="$from" />
+        </xsl:attribute>
+        <xsl:choose>
+          <xsl:when test="$from != $end">
+            <xsl:attribute name="end">
+              <xsl:value-of select="$end" />
+            </xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+            <!-- we need some extension in time,
+                 so take the next time mark -->
+            <xsl:attribute name="end">
+              <xsl:value-of select="concat('T', xs:integer(replace($end, 'T','')) + 1)" />
+            </xsl:attribute>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:value-of select="." />
+      </xsl:element>
+    </xsl:for-each>
+  </xsl:element>
+</xsl:template>
+
 <xsl:template name="prosody_tier">
   <xsl:element name="tier">
     <xsl:attribute name="id">
@@ -355,6 +397,7 @@
       <xsl:call-template name="punctuations_tier" />
       <xsl:call-template name="pho-canonical_inci_tier" />
       <xsl:call-template name="pho-realized_inci_tier" />
+      <xsl:call-template name="misc_tier" />
       <xsl:call-template name="prosody_tier" />
     </xsl:element>
   </xsl:element>
