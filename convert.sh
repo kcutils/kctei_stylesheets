@@ -125,6 +125,14 @@ for OUT_FORMAT in $OUT_FORMATS; do
     fi
     OUT_FILE="${OUT_ROOT_DIR}/${BASE_FILENAME}.${EXT}"
     STYLESHEET="${STYLESHEET_ROOT_PATH}/${STYLESHEET_NAME}"
+
+    if echo "$OSTYPE" | grep "cygwin" 2>&1 > /dev/null; then
+      OUT=$( cygpath -w $STYLESHEET )
+      if [ $? -eq 0 ]; then
+        STYLESHEET=$OUT
+      fi
+    fi
+
     if [ ! -f "$STYLESHEET" ]; then
       echo "ERROR: Unable to find stylesheet ${STYLESHEET}!"
       ERRORS=$(( $ERRORS + 1 ))
