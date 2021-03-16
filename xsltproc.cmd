@@ -1,5 +1,5 @@
 @ECHO OFF
-SET XSLT_PROC_JAR=lib\saxon9he.jar
+SET XSLT_PROC_JAR=lib\saxonhe.jar
 SET JAVA=C:\ProgramData\Oracle\Java\javapath\java.exe
 
 IF NOT EXIST %JAVA% (

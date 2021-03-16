@@ -9,8 +9,8 @@ Transformation can be done using Saxon-HE
 (http://saxon.sourceforge.net/).
 
 This directory contains wrapper scripts to call Saxon-HE using
-Java. For now you only need saxon9he.jar in ./lib/ to use
-these scripts.
+Java. For now you only need saxon.jar in ./lib/ to use these
+scripts which can be a link to saxon-he-10.3.jar for example.
 
 Examples
 

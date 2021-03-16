@@ -10,7 +10,7 @@ fi
 SCRIPT=$( readlink -f "$0" )
 SCRIPT_PATH=$( dirname "$SCRIPT" )
 
-SAXON_JAR="${SCRIPT_PATH}/lib/saxon9he.jar"
+SAXON_JAR="${SCRIPT_PATH}/lib/saxonhe.jar"
 
 if echo "$OSTYPE" | grep "cygwin" 2>&1 > /dev/null; then
   OUT=$( cygpath -w $SAXON_JAR )
