@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 
-  This stylesheet transforms Kiel Corpus ISO/TEO to eaf (ELAN).
+  This stylesheet transforms Kiel Corpus ISO/TEI to eaf (ELAN).
 
-  It produces five tiers:
+  It produces six tiers:
 
     - words and non-verbal sounds
     - punctuations
@@ -36,12 +36,12 @@
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                xmlns:xdt="http://www.w3.org/2005/xpath-datatypes"
-                xmlns:my="http://myohmy.example.com"
                 xpath-default-namespace="http://www.tei-c.org/ns/1.0"
                 version="2.0">
 
 <xsl:output method="xml" version="1.0" encoding="UTF-8" indent="yes" />
+
+<xsl:variable name="now" select="current-dateTime()"/>
 
 <xsl:template name="header">
   <xsl:element name="HEADER">
@@ -431,6 +431,7 @@
 </xsl:template>
 
 <xsl:template match="/">
+  <xsl:comment> File transformed from Kiel Corpus ISO/TEI (KCTEI)-Format to eaf using KCTEI2eaf-stylesheet on <xsl:value-of select="$now" />. </xsl:comment>
   <xsl:element name="ANNOTATION_DOCUMENT">
     <xsl:attribute name="AUTHOR">
     </xsl:attribute>

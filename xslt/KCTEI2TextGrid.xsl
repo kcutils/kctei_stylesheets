@@ -3,7 +3,7 @@
 
   This stylesheet transforms Kiel Corpus ISO/TEI to TextGrid (praat).
 
-  It produces five tiers:
+  It produces six tiers:
 
     - words and non-verbal sounds (interval tier)
     - punctuations (point tier)
@@ -116,7 +116,7 @@ item []:
         intervals [1]:
             xmin = </xsl:text><xsl:value-of select="$first_timeline_entry" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="$word_inc_start" /><xsl:text>
-            text = &quot;&quot;
+            text = &quot;"
 </xsl:text>
 </xsl:template>
 
@@ -124,7 +124,7 @@ item []:
   <xsl:text>        intervals [</xsl:text><xsl:value-of select="$word_inc_amount" /><xsl:text>]:
             xmin = </xsl:text><xsl:value-of select="$word_inc_end" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
-            text = &quot;&quot;
+            text = &quot;"
 </xsl:text>
 </xsl:template>
 
@@ -138,7 +138,7 @@ item []:
         intervals [1]:
             xmin = </xsl:text><xsl:value-of select="$first_timeline_entry" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="$first_inci_start" /><xsl:text>
-            text = &quot;&quot;
+            text = &quot;"
 </xsl:text>
 </xsl:template>
 
@@ -146,7 +146,7 @@ item []:
   <xsl:text>        intervals [</xsl:text><xsl:value-of select="$incidents_amount" /><xsl:text>]:
             xmin = </xsl:text><xsl:value-of select="$last_inci_end" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
-            text = &quot;&quot;
+            text = &quot;"
 </xsl:text>
 </xsl:template>
 
@@ -170,7 +170,7 @@ item []:
         intervals [1]:
             xmin = </xsl:text><xsl:value-of select="$first_timeline_entry" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="$first_pho-realized_from" /><xsl:text>
-            text = &quot;&quot;
+            text = &quot;"
 </xsl:text>
 </xsl:template>
 
@@ -178,7 +178,7 @@ item []:
   <xsl:text>        intervals [</xsl:text><xsl:value-of select="$pho-realized_amount" /><xsl:text>]:
             xmin = </xsl:text><xsl:value-of select="$last_pho-realized_to" /><xsl:text>
             xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
-            text = &quot;&quot;
+            text = &quot;"
 </xsl:text>
 </xsl:template>
 
@@ -222,6 +222,7 @@ item []:
 
   <xsl:for-each select="/TEI/text/body/annotationBlock/u/pc">
     <xsl:variable name="current_point" select="position()"/>
+      <!-- TODO: preceding-sibling kann auch ein vocal mit end-Attribut sein! s. l011a_l -->
     <xsl:variable name="end" select="replace(preceding-sibling::anchor[1]/@synch,'#','')" />
 
     <xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
