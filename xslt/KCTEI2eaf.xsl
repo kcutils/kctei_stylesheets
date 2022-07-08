@@ -63,7 +63,7 @@
 
 <xsl:template name="timeline">
   <xsl:element name="TIME_ORDER">
-    <xsl:for-each select="/TEI/text/front/timeline/when">
+    <xsl:for-each select="/TEI/text/timeline/when">
       <xsl:element name="TIME_SLOT">
         <xsl:attribute name="TIME_SLOT_ID">
           <xsl:value-of select="./@xml:id" />
@@ -377,7 +377,7 @@
 
           <xsl:attribute name="TIME_SLOT_REF1">
             <xsl:choose>
-              <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
+              <xsl:when test="/TEI/text/timeline/when[@id=$to_mark_name]">
                 <xsl:value-of select="@from" />
               </xsl:when>
               <xsl:otherwise>
@@ -391,7 +391,7 @@
 
           <xsl:attribute name="TIME_SLOT_REF2">
             <xsl:choose>
-              <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
+              <xsl:when test="/TEI/text/timeline/when[@id=$to_mark_name]">
                 <xsl:value-of select="concat('T', xs:integer(replace(@from, 'T', '')) + 1)" />
               </xsl:when>
               <xsl:otherwise>

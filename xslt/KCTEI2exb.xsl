@@ -62,7 +62,7 @@
 
 <xsl:template name="timeline">
   <xsl:element name="common-timeline">
-    <xsl:for-each select="/TEI/text/front/timeline/when">
+    <xsl:for-each select="/TEI/text/timeline/when">
       <xsl:element name="tli">
         <xsl:attribute name="id">
           <xsl:value-of select="./@xml:id" />
@@ -352,7 +352,7 @@
 
         <xsl:attribute name="start">
           <xsl:choose>
-            <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
+            <xsl:when test="/TEI/text/timeline/when[@id=$to_mark_name]">
               <xsl:value-of select="@from" />
             </xsl:when>
             <xsl:otherwise>
@@ -366,7 +366,7 @@
 
         <xsl:attribute name="end">
           <xsl:choose>
-            <xsl:when test="/TEI/text/front/timeline/when[@id=$to_mark_name]">
+            <xsl:when test="/TEI/text/timeline/when[@id=$to_mark_name]">
               <xsl:value-of select="concat('T', xs:integer(replace(@from, 'T', '')) + 1)" />
             </xsl:when>
             <xsl:otherwise>

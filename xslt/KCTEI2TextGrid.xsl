@@ -47,7 +47,7 @@
 
 <xsl:output method="text"/>
   <xsl:variable name="first_timeline_entry" select="0" />
-  <xsl:variable name="last_timeline_entry" select="max(/TEI/text/front/timeline/when/@interval)" />
+  <xsl:variable name="last_timeline_entry" select="max(/TEI/text/timeline/when/@interval)" />
 
   <xsl:variable name="word_amount" select="count(/TEI/text/body/annotationBlock/u/w)" />
   <xsl:variable name="first_word_start" select="if ((//w)[1]/@synch) then
@@ -91,7 +91,7 @@
   <xsl:function name="my:getIntervalById">
     <xsl:param name="root_node" />
     <xsl:param name="ID" />
-    <xsl:value-of select="$root_node/text/front/timeline/when[@xml:id=$ID]/@interval" />
+    <xsl:value-of select="$root_node/text/timeline/when[@xml:id=$ID]/@interval" />
   </xsl:function>
 
 <xsl:template name="header">
@@ -421,7 +421,7 @@ item []:
 </xsl:template>
 
 <xsl:template match="/TEI/teiHeader"></xsl:template>
-<xsl:template match="/TEI/text/front"></xsl:template>
+<xsl:template match="/TEI/text"></xsl:template>
 
 <xsl:template match="/TEI/text/body/annotationBlock">
   <xsl:variable name="block_start_mark" select="@start" />
