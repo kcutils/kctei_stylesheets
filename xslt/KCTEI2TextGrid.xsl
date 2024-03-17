@@ -6,7 +6,7 @@
   It produces six tiers:
 
     - words and non-verbal sounds (interval tier)
-    - punctuations (point tier)
+    - syntax (punctuations, false starts and truncations) (point tier)
     - canonical phones (point tier)
     - realized phones and non-verbal sounds (interval tier)
     - misc labels (point tier)
@@ -59,7 +59,8 @@
                                                 xs:integer(0)
                                             " />
 
-  <xsl:variable name="punctuations_amount" select="count(/TEI/text/body/annotationBlock/u/pc)" />
+  <!-- count punctuations and false starts and truncations on error-spanGrp -->
+  <xsl:variable name="syntax_amount" select="count(/TEI/text/body/annotationBlock/u/pc) + count(/TEI/text/body/annotationBlock/spanGrp[@type='error']/span)" />
 
   <xsl:variable name="incidents_amount" select="count(//(vocal|pause)) + 2" />
   <xsl:variable name="first_inci_start" select="if (//(vocal|pause)[1]/@start) then
@@ -150,13 +151,13 @@ item []:
 </xsl:text>
 </xsl:template>
 
-<xsl:template name="punctuations_header">
+<xsl:template name="syntax_header">
   <xsl:text>    item [2]:
         class = "TextTier" 
-        name = "Satzzeichen" 
+        name = "Syntax"
         xmin = 0 
         xmax = </xsl:text><xsl:value-of select="$last_timeline_entry" /><xsl:text>
-        points: size = </xsl:text><xsl:value-of select="$punctuations_amount" /><xsl:text>
+        points: size = </xsl:text><xsl:value-of select="$syntax_amount" /><xsl:text>
 </xsl:text>
 </xsl:template>
 
@@ -216,17 +217,30 @@ item []:
 
   <xsl:call-template name="wordinc_footer" />
 
-  <!-- build punctuation tier -->
+  <!-- build syntax tier -->
 
-  <xsl:call-template name="punctuations_header" />
+  <xsl:call-template name="syntax_header" />
 
-  <xsl:for-each select="/TEI/text/body/annotationBlock/u/pc">
-    <xsl:variable name="current_point" select="position()"/>
+  <xsl:variable name="syntax_elements">
+    <xsl:for-each select="/TEI/text/body/annotationBlock/((u/pc)|(spanGrp[@type='error']/span))">
       <!-- TODO: preceding-sibling kann auch ein vocal mit end-Attribut sein! s. l011a_l -->
-    <xsl:variable name="end" select="replace(preceding-sibling::anchor[1]/@synch,'#','')" />
+      <xsl:variable name="end" select="if (name(.) = 'span') then
+                                          replace(./@to,'#', '') else
+                                          replace(preceding-sibling::anchor[1]/@synch,'#','')
+                                       " />
+      <xsl:variable name="text" select="." />
 
+      <syntax_element end="{my:getIntervalById(/TEI,$end)}">
+        <xsl:value-of select="$text" />
+      </syntax_element>
+    </xsl:for-each>
+  </xsl:variable>
+
+  <xsl:for-each select="$syntax_elements/*">
+    <xsl:sort select="@end" data-type="number" />
+    <xsl:variable name="current_point" select="position()"/>
     <xsl:text>        points [</xsl:text><xsl:value-of select="$current_point" /><xsl:text>]:
-            num = </xsl:text><xsl:value-of select="my:getIntervalById(/TEI,$end)" /><xsl:text>
+            num = </xsl:text><xsl:value-of select="@end" /><xsl:text>
             text = &quot;</xsl:text><xsl:value-of select="." /><xsl:text>&quot;
 </xsl:text>
   </xsl:for-each>
