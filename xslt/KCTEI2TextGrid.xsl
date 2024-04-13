@@ -221,13 +221,25 @@ item []:
 
   <xsl:call-template name="syntax_header" />
 
+  <!--
+    place punctuation marks (pc) and false starts and truncations
+    (in error-spanGrp) on this tier,
+    pc needs @end- or @synch-attribute from first preceding-sibling,
+    spans in error-spanGrp have @to-attribute themselves
+  -->
   <xsl:variable name="syntax_elements">
     <xsl:for-each select="/TEI/text/body/annotationBlock/((u/pc)|(spanGrp[@type='error']/span))">
-      <!-- TODO: preceding-sibling kann auch ein vocal mit end-Attribut sein! s. l011a_l -->
-      <xsl:variable name="end" select="if (name(.) = 'span') then
-                                          replace(./@to,'#', '') else
-                                          replace(preceding-sibling::anchor[1]/@synch,'#','')
-                                       " />
+      <xsl:variable name="end" select="if (name(.) = 'span')    then
+                                          replace(./@to,'#','') else
+                                          (if (name(./preceding-sibling::*[1]) = 'vocal' or
+                                               name(./preceding-sibling::*[1]) = 'pause')    then
+                                              replace(./preceding-sibling::*[1]/@end,'#','') else
+                                              (if (name(./preceding-sibling::*[1]) = 'anchor')     then
+                                                  replace(./preceding-sibling::*[1]/@synch,'#','') else
+                                                  'Error: unknown case'
+                                              )
+                                          )
+                                      " />
       <xsl:variable name="text" select="." />
 
       <syntax_element end="{my:getIntervalById(/TEI,$end)}">
