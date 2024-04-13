@@ -2,5 +2,6 @@ data/*
 !data/.gitkeep
 lib/*
 !lib/.gitkeep
+!lib/testTextgridOpen.praat
 test/
 kctei_stylesheets.zip

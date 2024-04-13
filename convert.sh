@@ -6,11 +6,16 @@ SCRIPT_PATH=$( dirname "$SCRIPT" )
 XSLTPROC="${SCRIPT_PATH}/xsltproc.sh"
 STYLESHEET_ROOT_PATH="${SCRIPT_PATH}/xslt/"
 
+PRAAT_CMD="$( which praat )"
+
+TEXTGRID_VALIDATE_SCRIPT="${SCRIPT_PATH}/lib/testTextgridOpen.praat"
+
 STYLESHEETS="TextGrid:KCTEI2TextGrid.xsl eaf:KCTEI2eaf.xsl exb:KCTEI2exb.xsl"
 
 OUT_FORMATS=
 
 ERRORS=0
+
 
 usage () {
 cat << END
@@ -149,6 +154,21 @@ for OUT_FORMAT in $OUT_FORMATS; do
       echo "$OUT"
     else
       echo "$OUT" > "$OUT_FILE"
+
+      if [ "$EXT" = "TextGrid" ] && [ "$PRAAT_CMD" != "" ]; then
+        if [ $VERBOSE -eq 1 ]; then
+          echo "Checking if generated TextGrid is valid ..."
+        fi
+
+        OUT=$( "$PRAAT_CMD" --run "$TEXTGRID_VALIDATE_SCRIPT" "$( realpath $OUT_FILE )" 2>&1 )
+        if [ $? -ne 0 ]; then
+          echo "ERROR while opening generated TextGrid $OUT_FILE !"
+          ERRORS=$(( $ERRORS + 1 ))
+          echo "$OUT"
+#          rm "$OUT_FILE"
+        fi
+      fi
+
     fi
   done
 done
